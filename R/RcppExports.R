@@ -5,6 +5,10 @@ absdist_impl <- function(x, y) {
     .Call('valr_absdist_impl', PACKAGE = 'valr', x, y)
 }
 
+chromsweep_impl <- function(query_df, database_df, chroms) {
+    .Call('valr_chromsweep_impl', PACKAGE = 'valr', query_df, database_df, chroms)
+}
+
 closest_impl <- function(x, y, suffix_x, suffix_y) {
     .Call('valr_closest_impl', PACKAGE = 'valr', x, y, suffix_x, suffix_y)
 }

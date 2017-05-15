@@ -18,6 +18,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// chromsweep_impl
+DataFrame chromsweep_impl(DataFrame query_df, DataFrame database_df, DataFrame chroms);
+RcppExport SEXP valr_chromsweep_impl(SEXP query_dfSEXP, SEXP database_dfSEXP, SEXP chromsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type query_df(query_dfSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type database_df(database_dfSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type chroms(chromsSEXP);
+    rcpp_result_gen = Rcpp::wrap(chromsweep_impl(query_df, database_df, chroms));
+    return rcpp_result_gen;
+END_RCPP
+}
 // closest_impl
 DataFrame closest_impl(GroupedDataFrame x, GroupedDataFrame y, const std::string& suffix_x, const std::string& suffix_y);
 RcppExport SEXP valr_closest_impl(SEXP xSEXP, SEXP ySEXP, SEXP suffix_xSEXP, SEXP suffix_ySEXP) {

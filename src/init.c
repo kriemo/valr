@@ -21,6 +21,7 @@ Check these declarations against the C/Fortran source code.
 
 /* .Call calls */
 extern SEXP valr_absdist_impl(SEXP, SEXP);
+extern SEXP valr_chromsweep_impl(SEXP, SEXP, SEXP);
 extern SEXP valr_closest_impl(SEXP, SEXP, SEXP, SEXP);
 extern SEXP valr_complement_impl(SEXP, SEXP);
 extern SEXP valr_coverage_impl(SEXP, SEXP);
@@ -33,6 +34,7 @@ extern SEXP valr_subtract_impl(SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
   {"valr_absdist_impl",    (DL_FUNC) &valr_absdist_impl,    2},
+  {"valr_chromsweep_impl", (DL_FUNC) &valr_chromsweep_impl, 3},
   {"valr_closest_impl",    (DL_FUNC) &valr_closest_impl,    4},
   {"valr_complement_impl", (DL_FUNC) &valr_complement_impl, 2},
   {"valr_coverage_impl",   (DL_FUNC) &valr_coverage_impl,   2},

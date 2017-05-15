@@ -39,4 +39,43 @@ inline ivl_vector_t makeIntervalVector(DataFrame df, SlicingIndex si,
   return ivls ;
 }
 
+// Interval class that keeps chromosome and row_number as value
+template <class T, typename K = int>
+class ChromInterval {
+public:
+  std::string chrom;
+  K start;
+  K stop;
+  T value;
+  ChromInterval(const std::string& c, K s, K e, const T& v)
+    : chrom(c)
+    , start(s)
+    , stop(e)
+    , value(v)
+  { }
+};
+
+// secondary interval types used for chromsweep algorithm
+typedef ChromInterval<int> chivl_t ;
+typedef std::vector<chivl_t> chivl_vector_t ;
+
+inline chivl_vector_t makeChromIntervalVector(DataFrame df,
+                                              std::string col_chrom = "chrom",
+                                              std::string col_start = "start",
+                                              std::string col_end = "end") {
+
+  chivl_vector_t ivls ;
+
+  std::vector<std::string> chroms = df[col_chrom] ;
+  IntegerVector starts = df[col_start] ;
+  IntegerVector ends   = df[col_end] ;
+
+  size_t size = df.nrows() ;
+
+  for (int i = 0; i < size; ++i) {
+    ivls.push_back(chivl_t(chroms[i], starts[i], ends[i], i)) ;
+  }
+  return ivls ;
+}
+
 #endif

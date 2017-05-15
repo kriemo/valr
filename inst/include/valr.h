@@ -13,6 +13,7 @@
 #include <random>
 #include <functional>
 #include <stack>
+#include <iterator>
 
 // [[Rcpp::plugins(cpp11)]]
 
