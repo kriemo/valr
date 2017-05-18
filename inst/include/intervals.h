@@ -56,15 +56,15 @@ public:
 };
 
 // secondary interval types used for chromsweep algorithm
-typedef ChromInterval<int> chivl_t ;
-typedef std::vector<chivl_t> chivl_vector_t ;
+typedef ChromInterval<int> chr_ivl_t ;
+typedef std::vector<chr_ivl_t> chr_ivl_vector_t ;
 
-inline chivl_vector_t makeChromIntervalVector(DataFrame df,
+inline chr_ivl_vector_t makeChromIntervalVector(DataFrame df,
                                               std::string col_chrom = "chrom",
                                               std::string col_start = "start",
                                               std::string col_end = "end") {
 
-  chivl_vector_t ivls ;
+  chr_ivl_vector_t ivls ;
 
   std::vector<std::string> chroms = df[col_chrom] ;
   IntegerVector starts = df[col_start] ;
@@ -73,7 +73,7 @@ inline chivl_vector_t makeChromIntervalVector(DataFrame df,
   size_t size = df.nrows() ;
 
   for (int i = 0; i < size; ++i) {
-    ivls.push_back(chivl_t(chroms[i], starts[i], ends[i], i)) ;
+    ivls.push_back(chr_ivl_t(chroms[i], starts[i], ends[i], i)) ;
   }
   return ivls ;
 }

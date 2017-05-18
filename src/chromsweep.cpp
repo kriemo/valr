@@ -11,43 +11,44 @@
 
 #include "valr.h"
 
-int overlaps(ChromInterval<int> a, ChromInterval<int> b){
+int overlaps(chr_ivl_t a, chr_ivl_t b){
   return std::min(a.stop, b.stop) - std::max(a.start, b.start) ;
 }
 
-bool after(ChromInterval<int> a, ChromInterval<int> b){
+bool after(chr_ivl_t a, chr_ivl_t b){
   return a.start > b.stop ;
 }
 
-void scan_cache(std::vector<ChromInterval<int>>::iterator& curr_qy,
-                const std::vector<ChromInterval<int>>& query,
-                std::vector<ChromInterval<int>>& db_cache,
-                std::vector<ChromInterval<int>>& hits){
+void scan_cache(chr_ivl_vector_t::iterator& curr_qy,
+                const chr_ivl_vector_t& query,
+                chr_ivl_vector_t& db_cache,
+                chr_ivl_vector_t& hits){
 
   if(curr_qy == query.end()){
     return  ;
   }
 
-  std::vector<ChromInterval<int>> temp_cache ;
-  for (auto curr_db:db_cache){
-   // Rcout << "scanning cache"<< std::endl ;
-    auto past = after(*curr_qy, curr_db) ;
-    if((curr_qy->chrom == curr_db.chrom) && !past){
-      temp_cache.push_back(curr_db) ;
-      auto overlap = overlaps(*curr_qy, curr_db) ;
+  chr_ivl_vector_t temp_cache ;
+
+  for (chr_ivl_vector_t::iterator curr_db = db_cache.begin() ;
+       curr_db != db_cache.end(); ++curr_db){
+    auto past = after(*curr_qy, *curr_db) ;
+    if((curr_qy->chrom == curr_db->chrom) && !past){
+      temp_cache.push_back(*curr_db) ;
+      auto overlap = overlaps(*curr_qy, *curr_db) ;
       if (overlap >= 0) {
-        curr_db.value = overlap ;
-        hits.push_back(curr_db) ;
+        curr_db->value = overlap ;
+        hits.push_back(*curr_db) ;
       }
     }
   }
   db_cache = temp_cache ;
 }
 
-void report_hits(ChromInterval<int> current_qy,
-                 std::vector<ChromInterval<int>> hits,
+void report_hits(chr_ivl_t current_qy,
+                 chr_ivl_vector_t hits,
                  std::vector<int>& indices_x,
-                 std::vector<ChromInterval<int>>& y_ivls){
+                 chr_ivl_vector_t& y_ivls){
 
   for(auto it:hits){
     indices_x.push_back(current_qy.value) ;
@@ -55,8 +56,8 @@ void report_hits(ChromInterval<int> current_qy,
   }
 }
 
-std::vector<ChromInterval<int>>::iterator get_next(std::vector<ChromInterval<int>>::iterator& ivls,
-                                                   std::vector<ChromInterval<int>> container){
+chr_ivl_vector_t::iterator get_next(chr_ivl_vector_t::iterator& ivls,
+                                    chr_ivl_vector_t container){
   if(ivls != container.end()){
     auto out_it = std::next(ivls, 1) ;
     return out_it ;
@@ -65,9 +66,9 @@ std::vector<ChromInterval<int>>::iterator get_next(std::vector<ChromInterval<int
   }
 }
 
-bool chrom_less(const std::vector<std::string>& chroms,
-                std::string qy_chrom,
-                std::string db_chrom){
+bool check_chrom_order(std::string qy_chrom,
+                       std::string db_chrom,
+                       const std::vector<std::string>& chroms){
 
   auto qy_it = std::find(chroms.begin(), chroms.end(), qy_chrom);
   auto db_it = std::find(chroms.begin(), chroms.end(), db_chrom);
@@ -87,41 +88,39 @@ bool chrom_less(const std::vector<std::string>& chroms,
 
 }
 
-void chrom_check(std::vector<ChromInterval<int>>::iterator& curr_qy,
-                 std::vector<ChromInterval<int>>::iterator& curr_db,
-                 const std::vector<ChromInterval<int>>& query,
-                 const std::vector<ChromInterval<int>>& database,
-                 std::vector<ChromInterval<int>>& db_cache,
-                 std::vector<ChromInterval<int>>& hits,
+void chrom_check(chr_ivl_vector_t::iterator& curr_qy,
+                 chr_ivl_vector_t::iterator& curr_db,
+                 const chr_ivl_vector_t& query,
+                 const chr_ivl_vector_t& database,
+                 chr_ivl_vector_t& db_cache,
+                 chr_ivl_vector_t& hits,
                  std::vector<int>& indices_x,
-                 std::vector<ChromInterval<int>>& y_ivls,
+                 chr_ivl_vector_t& y_ivls,
                  const std::vector<std::string>& chroms){
 
   if(curr_db == database.end() || curr_qy->chrom == curr_db->chrom){
     return ;
   }
 
-  if(!chrom_less(chroms, curr_qy->chrom, curr_db->chrom)){
+  if(!check_chrom_order(curr_qy->chrom, curr_db->chrom, chroms)){
     auto tmp_curr_db = curr_db ;
-    while(tmp_curr_db != database.end() && chrom_less(chroms, tmp_curr_db->chrom, curr_qy->chrom)){
+    while(tmp_curr_db != database.end() &&
+          check_chrom_order(tmp_curr_db->chrom, curr_qy->chrom, chroms)){
       ++tmp_curr_db ;
-      Rcpp::checkUserInterrupt() ;
     }
     curr_db = tmp_curr_db ;
     db_cache.clear() ;
 
-  } else if(chrom_less(chroms, curr_qy->chrom, curr_db->chrom)){
+  } else if(check_chrom_order(curr_qy->chrom, curr_db->chrom, chroms)){
     auto tmp_curr_qy = curr_qy ;
     while(tmp_curr_qy != query.end() && (tmp_curr_qy->chrom == curr_qy->chrom)){
-  //    Rcpp::checkUserInterrupt() ;
       scan_cache(tmp_curr_qy, query, db_cache, hits) ;
       report_hits(*tmp_curr_qy, hits, indices_x, y_ivls) ;
       ++tmp_curr_qy ;
       hits.clear() ;
-    //  Rcout << "greater thann"<< std::endl ;
     }
-    while(tmp_curr_qy != query.end() && chrom_less(chroms, tmp_curr_qy->chrom, curr_db->chrom)){
-  //    Rcpp::checkUserInterrupt() ;
+    while(tmp_curr_qy != query.end() &&
+          check_chrom_order(tmp_curr_qy->chrom, curr_db->chrom, chroms)){
       report_hits(*tmp_curr_qy, hits, indices_x, y_ivls) ;
       ++tmp_curr_qy ;
     }
@@ -130,14 +129,14 @@ void chrom_check(std::vector<ChromInterval<int>>::iterator& curr_qy,
   }
 }
 
-void sweep(std::vector<ChromInterval<int>> query,
-           std::vector<ChromInterval<int>> database,
-           std::vector<ChromInterval<int>>& ivls_y,
+void sweep(chr_ivl_vector_t query,
+           chr_ivl_vector_t database,
+           chr_ivl_vector_t& ivls_y,
            std::vector<int>& indices_x,
            const std::vector<std::string>& chroms) {
 
-  std::vector<ChromInterval<int>> db_cache ;
-  std::vector<ChromInterval<int>> hits ;
+  chr_ivl_vector_t db_cache ;
+  chr_ivl_vector_t hits ;
 
   // initialize iterators for query and db
   auto curr_qy = query.begin() ;
@@ -152,7 +151,6 @@ void sweep(std::vector<ChromInterval<int>> query,
     while (curr_db != database.end() && curr_qy != query.end() &&
            curr_qy->chrom == curr_db->chrom && !after(*curr_db, *curr_qy)){
       auto overlap = overlaps(*curr_qy, *curr_db) ;
-  //    Rcpp::checkUserInterrupt() ;
       if(overlap >= 0){
         curr_db->value = overlap ;
         hits.push_back(*curr_db) ;
@@ -178,7 +176,7 @@ DataFrame chromsweep_impl(DataFrame query_df,
   auto database_ivls = makeChromIntervalVector(database_df) ;
 
   std::vector<int> indices_x ;
-  std::vector<ChromInterval<int>> ivls_y ;
+  chr_ivl_vector_t ivls_y ;
   std::vector<std::string > chrom_order = chroms["chrom"] ;
 
   sweep(query_ivls, database_ivls, ivls_y, indices_x, chrom_order) ;
@@ -237,3 +235,26 @@ DataFrame chromsweep_impl(DataFrame query_df,
 
   return out ;
 }
+
+/***R
+library(valr)
+library(dplyr)
+
+genome <- tibble::tribble(
+    ~chrom, ~size,
+    "chr1", 1e6,
+    "chr2", 1e7
+)
+
+n <- 1e5
+x <- bed_random(genome, n = n)
+y <- bed_random(genome, n = n)
+
+library(microbenchmark)
+microbenchmark(
+  valr::chromsweep_impl(x, y, genome),
+  bed_intersect(x, y),
+  times = 3,
+  unit = 's'
+)
+*/
