@@ -28,5 +28,6 @@ using namespace dplyr ;
 #include "group_apply.h"
 #include "genome.h"
 #include "random.h"
+#include "rcpphtslib.h"
 
 #endif

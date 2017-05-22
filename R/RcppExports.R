@@ -5,6 +5,10 @@ absdist_impl <- function(x, y) {
     .Call('valr_absdist_impl', PACKAGE = 'valr', x, y)
 }
 
+read_bam <- function(bampath) {
+    .Call('valr_read_bam', PACKAGE = 'valr', bampath)
+}
+
 chromsweep_impl <- function(query_df, database_df, chroms) {
     .Call('valr_chromsweep_impl', PACKAGE = 'valr', query_df, database_df, chroms)
 }
