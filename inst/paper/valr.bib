@@ -1,0 +1,132 @@
+@article{haider_bedr_2016,
+	title = {A bedr way of genomic interval processing},
+	volume = {11},
+	issn = {1751-0473},
+	url = {http://www.ncbi.nlm.nih.gov/pmc/articles/PMC5157088/},
+	doi = {10.1186/s13029-016-0059-5},
+	abstract = {Background
+Next-generation sequencing is making it critical to robustly and rapidly handle genomic ranges within standard pipelines. Standard use-cases include annotating sequence ranges with gene or other genomic annotation, merging multiple experiments together and subsequently quantifying and visualizing the overlap. The most widely-used tools for these tasks work at the command-line (e.g. BEDTools) and the small number of available R packages are either slow or have distinct semantics and features from command-line interfaces.
+
+Results
+To provide a robust R-based interface to standard command-line tools for genomic coordinate manipulation, we created bedr. This open-source R package can use either BEDTools or BEDOPS as a back-end and performs data-manipulation extremely quickly, creating R data structures that can be readily interfaced with existing computational pipelines. It includes data-visualization capabilities and a number of data-access functions that interface with standard databases like UCSC and COSMIC.
+
+Conclusions
+bedr package provides an open source solution to enable genomic interval data manipulation and restructuring in R programming language which is commonly used in bioinformatics, and therefore would be useful to bioinformaticians and genomic researchers.
+
+Electronic supplementary material
+The online version of this article (doi:10.1186/s13029-016-0059-5) contains supplementary material, which is available to authorized users.},
+	journal = {Source Code for Biology and Medicine},
+	author = {Haider, Syed and Waggott, Daryl and Lalonde, Emilie and Fung, Clement and Liu, Fei-Fei and Boutros, Paul C.},
+	month = dec,
+	year = {2016},
+	pmid = {27999613},
+	pmcid = {PMC5157088},
+	file = {PubMed Central Full Text PDF:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/8XPZ3B3T/Haider et al. - 2016 - A bedr way of genomic interval processing.pdf:application/pdf}
+}
+
+@article{neph_bedops:_2012,
+	title = {{BEDOPS}: high-performance genomic feature operations},
+	volume = {28},
+	issn = {1367-4803},
+	shorttitle = {{BEDOPS}},
+	url = {https://academic.oup.com/bioinformatics/article/28/14/1919/218826/BEDOPS-high-performance-genomic-feature-operations},
+	doi = {10.1093/bioinformatics/bts277},
+	number = {14},
+	urldate = {2017-06-05},
+	journal = {Bioinformatics},
+	author = {Neph, Shane and Kuehn, M. Scott and Reynolds, Alex P. and Haugen, Eric and Thurman, Robert E. and Johnson, Audra K. and Rynes, Eric and Maurano, Matthew T. and Vierstra, Jeff and Thomas, Sean and Sandstrom, Richard and Humbert, Richard and Stamatoyannopoulos, John A.},
+	month = jul,
+	year = {2012},
+	pages = {1919--1920},
+	file = {Full Text PDF:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/VH4MXUPV/Neph et al. - 2012 - BEDOPS high-performance genomic feature operation.pdf:application/pdf;Snapshot:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/FJNQE7C7/BEDOPS-high-performance-genomic-feature-operations.html:text/html}
+}
+
+@article{quinlan_bedtools:_2010,
+	title = {{BEDTools}: a flexible suite of utilities for comparing genomic features},
+	volume = {26},
+	issn = {1367-4803},
+	shorttitle = {{BEDTools}},
+	url = {http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2832824/},
+	doi = {10.1093/bioinformatics/btq033},
+	abstract = {Motivation: Testing for correlations between different sets of genomic features is a fundamental task in genomics research. However, searching for overlaps between features with existing web-based methods is complicated by the massive datasets that are routinely produced with current sequencing technologies. Fast and flexible tools are therefore required to ask complex questions of these data in an efficient manner., Results: This article introduces a new software suite for the comparison, manipulation and annotation of genomic features in Browser Extensible Data (BED) and General Feature Format (GFF) format. BEDTools also supports the comparison of sequence alignments in BAM format to both BED and GFF features. The tools are extremely efficient and allow the user to compare large datasets (e.g. next-generation sequencing data) with both public and custom genome annotation tracks. BEDTools can be combined with one another as well as with standard UNIX commands, thus facilitating routine genomics tasks as well as pipelines that can quickly answer intricate questions of large genomic datasets., Availability and implementation: BEDTools was written in C++. Source code and a comprehensive user manual are freely available at http://code.google.com/p/bedtools, Contact: aaronquinlan@gmail.com; imh4y@virginia.edu, Supplementary information: Supplementary data are available at Bioinformatics online.},
+	number = {6},
+	journal = {Bioinformatics},
+	author = {Quinlan, Aaron R. and Hall, Ira M.},
+	month = mar,
+	year = {2010},
+	pmid = {20110278},
+	pmcid = {PMC2832824},
+	pages = {841--842},
+	file = {PubMed Central Full Text PDF:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/G2WTR38Z/Quinlan and Hall - 2010 - BEDTools a flexible suite of utilities for compar.pdf:application/pdf}
+}
+
+@article{lawrence_software_2013,
+	title = {Software for {Computing} and {Annotating} {Genomic} {Ranges}},
+	volume = {9},
+	issn = {1553-7358},
+	url = {http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1003118},
+	doi = {10.1371/journal.pcbi.1003118},
+	abstract = {We describe Bioconductor infrastructure for representing and computing on annotated genomic ranges and integrating genomic data with the statistical computing features of R and its extensions. At the core of the infrastructure are three packages: IRanges, GenomicRanges, and GenomicFeatures. These packages provide scalable data structures for representing annotated ranges on the genome, with special support for transcript structures, read alignments and coverage vectors. Computational facilities include efficient algorithms for overlap and nearest neighbor detection, coverage calculation and other range operations. This infrastructure directly supports more than 80 other Bioconductor packages, including those for sequence analysis, differential expression analysis and visualization.},
+	number = {8},
+	urldate = {2017-06-05},
+	journal = {PLOS Computational Biology},
+	author = {Lawrence, Michael and Huber, Wolfgang and Pagès, Hervé and Aboyoun, Patrick and Carlson, Marc and Gentleman, Robert and Morgan, Martin T. and Carey, Vincent J.},
+	month = aug,
+	year = {2013},
+	keywords = {a, b, c, d, e, G, h, i, l, m, n, o, p, r, s, t, u, x, y},
+	pages = {e1003118},
+	file = {Full Text PDF:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/6QH8UXC8/Lawrence et al. - 2013 - Software for Computing and Annotating Genomic Rang.pdf:application/pdf;Snapshot:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/KJBT6SGQ/article.html:text/html}
+}
+
+
+@article{dale_pybedtools:_2011,
+	title = {Pybedtools: a flexible {Python} library for manipulating genomic datasets and annotations},
+	volume = {27},
+	issn = {1367-4803},
+	shorttitle = {Pybedtools},
+	url = {https://academic.oup.com/bioinformatics/article/27/24/3423/304825/Pybedtools-a-flexible-Python-library-for},
+	doi = {10.1093/bioinformatics/btr539},
+	number = {24},
+	urldate = {2017-06-06},
+	journal = {Bioinformatics},
+	author = {Dale, Ryan K. and Pedersen, Brent S. and Quinlan, Aaron R.},
+	month = dec,
+	year = {2011},
+	pages = {3423--3424},
+	file = {Full Text PDF:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/DKWFQQVU/Dale et al. - 2011 - Pybedtools a flexible Python library for manipula.pdf:application/pdf;Snapshot:/Users/kriemo/Library/Application Support/Zotero/Profiles/ulej4gwc.default/zotero/storage/JSQF2CXQ/btr539.html:text/html}
+}
+
+@Manual{chang_shiny_2017,
+  title = {shiny: Web Application Framework for R},
+  author = {Winston Chang and Joe Cheng and JJ Allaire and Yihui Xie and Jonathan McPherson},
+  year = {2017},
+  note = {R package version 1.0.3},
+  url = {https://CRAN.R-project.org/package=shiny},
+}
+
+@Manual{wickham_tidyverse_2017,
+  title = {tidyverse: Easily Install and Load 'Tidyverse' Packages},
+  author = {Hadley Wickham},
+  year = {2017},
+  note = {R package version 1.1.1},
+  url = {https://CRAN.R-project.org/package=tidyverse},
+}
+
+@Manual{wickham_dplyr_2016,
+  title = {dplyr: A Grammar of Data Manipulation},
+  author = {Hadley Wickham and Romain Francois},
+  year = {2016},
+  note = {R package version 0.5.0},
+  url = {https://CRAN.R-project.org/package=dplyr},
+}
+
+@Article{eddelbuettel_rcpp_2011,
+  title = {{Rcpp}: Seamless {R} and {C++} Integration},
+  author = {Dirk Eddelbuettel and Romain Fran\c{c}ois},
+  journal = {Journal of Statistical Software},
+  year = {2011},
+  volume = {40},
+  number = {8},
+  pages = {1--18},
+  url = {http://www.jstatsoft.org/v40/i08/},
+}

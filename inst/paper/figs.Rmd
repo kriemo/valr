@@ -1,0 +1,301 @@
+---
+title: "F1000 paper figures"
+author: "Kent Riemondy RBI"
+date: "June 6, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_libs}
+library(valr)
+library(tidyverse)
+library(cowplot)
+```
+## Figure 1
+
+```{r, fig1}
+
+# theme to make pretty for publication
+
+pub_theme <- theme(axis.text = element_text(size = 14),
+                   plot.title = element_text(size = 14),
+                   strip.text = element_text(size = 14))
+
+
+x <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  'chr1', 25,     50,
+  'chr1', 100,    125
+)
+
+y <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  'chr1', 30,     75
+)
+
+a <- bed_glyph(bed_intersect(x, y)) + pub_theme
+
+x <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  'chr1',      1,      50,
+  'chr1',      10,     75,
+  'chr1',      100,    120
+)
+
+b <- bed_glyph(bed_merge(x)) + pub_theme
+plot_grid(a, b, align = 'h', nrow = 1, labels="AUTO", scale = c(.9, .9))
+ggsave("glyphs.pdf", width = 8, height = 4)
+
+```
+
+## Figure 2
+```{r fig2}
+# `valr_example()` identifies the path of example files
+bedfile <- valr_example('genes.hg19.chr22.bed.gz')
+genomefile <- valr_example('hg19.chrom.sizes.gz')
+bgfile  <- valr_example('hela.h3k4.chip.bg.gz')
+
+genes <- read_bed(bedfile, n_fields = 6)
+genome <- read_genome(genomefile)
+y <- read_bedgraph(bgfile)
+
+# generate 1 bp TSS intervals, `+` strand only
+tss <- genes %>%
+  filter(strand == '+') %>%
+  mutate(end = start + 1)
+
+# 1000 bp up and downstream
+region_size <- 1000
+# 50 bp windows
+win_size <- 50
+
+# add slop to the TSS, break into windows and add a group
+x <- tss %>%
+  bed_slop(genome, both = region_size) %>%
+  bed_makewindows(genome, win_size)
+
+x
+
+# map signals to TSS regions and calculate summary statistics.
+res <- bed_map(x, y, win_sum = sum(value, na.rm = TRUE)) %>%
+  group_by(.win_id) %>%
+  summarize(win_mean = mean(win_sum, na.rm = TRUE),
+            win_sd = sd(win_sum, na.rm = TRUE))
+
+res
+
+x_labels <- seq(-region_size, region_size, by = win_size * 5)
+x_breaks <- seq(1, 41, by = 5)
+
+sd_limits <- aes(ymax = win_mean + win_sd, ymin = win_mean - win_sd)
+
+p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
+  geom_point(size = 0.25) + geom_pointrange(sd_limits, size = 0.1) + 
+  scale_x_continuous(labels = x_labels, breaks = x_breaks) + 
+  xlab('Position (bp from TSS)') + ylab('Signal') + 
+  pub_theme +
+  theme_classic()
+
+plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
+ggsave("tss.pdf", width = 3.5, height = 2.25)
+```
+
+## Figure 3
+
+```{r, message=FALSE}
+# Load required packages
+library(valr)
+library(tidyverse)
+library(scales)
+library(microbenchmark)
+library(stringr)
+library(cowplot)
+
+# Set-up test genome
+genome <- read_genome(valr_example('hg19.chrom.sizes.gz'))
+write_tsv(genome, "genome.txt", col_names=FALSE)
+
+# number of intervals
+n <- 1e6
+# number of timing reps
+nrep <- 10
+
+seed_x <- 1010486
+x <- bed_random(genome, n = n, seed = seed_x)
+write_tsv(x, "x.bed", col_names=FALSE)
+seed_y <- 9283019
+y <- bed_random(genome, n = n, seed = seed_y)
+write_tsv(y, "y.bed", col_names=FALSE)
+
+res <- microbenchmark(
+  # randomizing functions
+  bed_random(genome, n = n, seed = seed_x),
+  bed_shuffle(x, genome, seed = seed_x),
+  # # single tbl functions
+  bed_slop(x, genome, both = 1000),
+  bed_flank(x, genome, both = 1000),
+  bed_merge(x),
+  bed_cluster(x),
+  bed_complement(x, genome),
+  # multi tbl functions
+  bed_closest(x, y),
+  bed_intersect(x, y),
+  bed_map(x, y, .n = n()),
+  bed_subtract(x, y),
+  # stats
+  bed_reldist(x, y),
+  bed_jaccard(x, y),
+  bed_fisher(x, y, genome),
+  #utils 
+  bed_makewindows(x, genome, win_size = 100),
+  times = nrep,
+  unit = 's')
+
+load_file <- function(filename) {
+  if(endsWith(filename, ".txt")){
+    read_genome(filename)
+  } else if (endsWith(filename, ".bed")) {
+    read_bed(filename)
+  }
+}
+
+genome_file <- "genome.txt"
+x_bed <- "x.bed"
+y_bed  <- "y.bed"
+
+res_hard <- microbenchmark(
+  # randomizing functions
+  bed_random(load_file(genome_file), n = n, seed = seed_x),
+  bed_shuffle(load_file(x_bed), load_file(genome_file), seed = seed_x),
+  # # single tbl functions
+  bed_slop(load_file(x_bed), load_file(genome_file), both = 1000),
+  bed_flank(load_file(x_bed), load_file(genome_file), both = 1000),
+  bed_merge(load_file(x_bed)),
+  bed_cluster(load_file(x_bed)),
+  bed_complement(load_file(x_bed), load_file(genome_file)),
+  # multi tbl functions
+  bed_closest(load_file(x_bed), load_file(y_bed)),
+  bed_intersect(load_file(x_bed), load_file(y_bed)),
+  bed_map(load_file(x_bed), load_file(y_bed), .n = n()),
+  bed_subtract(load_file(x_bed), load_file(y_bed)),
+  # stats
+  bed_reldist(load_file(x_bed), load_file(y_bed)),
+  bed_jaccard(load_file(x_bed), load_file(y_bed)),
+  bed_fisher(load_file(x_bed), load_file(y_bed), load_file(genome_file)),
+  #utils 
+  bed_makewindows(load_file(x_bed), load_file(genome_file), win_size = 100),
+  times = nrep,
+  unit = 's')
+
+# covert nanoseconds to seconds
+res <- res %>%
+  as_tibble() %>%
+  mutate(time = time / 1e9)
+
+res_hard <- res_hard %>%
+  as_tibble() %>%
+  mutate(time = time / 1e9)
+
+# futz with the x-axis
+sts <- boxplot.stats(res$time)$stats
+# filter out outliers (currently filtering fisher and map)
+# res <- filter(res, time <= max(sts) * 1.05)
+
+```
+
+```{bash}
+# Function to benchmark any bash command
+repeats=10
+
+bench_tests() {
+    # --------------------------------------------------------------------------
+    # Benchmark loop
+    # --------------------------------------------------------------------------
+    echo 'Benchmarking ' $1'...';
+
+    # Run the given command [repeats] times
+    for (( i = 1; i <= $repeats ; i++ ))
+    do
+        # Indicate the command we just ran in the csv file
+        echo -ne $3"\t" >> $2
+        # runs time function for the called script, output in a comma seperated
+        # format output file specified with -o command and -a specifies append
+        # requires gnu-time not BSD
+        gtime -f %e -o ${2} -a ${1} > /dev/null 2>&1
+    done;
+
+}
+
+# bedtools time
+# set-up files for bedtools function
+bedtools sort -i y.bed > y1.bed
+bedtools sort -i x.bed > x1.bed
+sort -k1,1 genome.txt > genome1.txt
+
+## Run timing test
+rm -f time.txt
+
+bench_tests "bedtools random -g genome1.txt -n 1000000 -seed 1010486" "time.txt" "random"
+bench_tests "bedtools shuffle -i x.bed -g genome1.txt -seed 1010486" "time.txt" "shuffle"
+# single tbl function
+bench_tests "bedtools slop -i x1.bed -g genome1.txt -b 1000" "time.txt" "slop"
+bench_tests "bedtools flank -i x1.bed -g genome1.txt -b 1000" "time.txt" "flank"
+bench_tests "bedtools merge -i x1.bed" "time.txt" "merge"
+bench_tests "bedtools cluster -i x1.bed" "time.txt" "cluster"
+bench_tests "bedtools complement -i x1.bed -g genome1.txt" "time.txt" "complement"
+# multi tbl functions
+bench_tests "bedtools closest -a x1.bed -b y1.bed" "time.txt" "closest"
+bench_tests "bedtools intersect -a x1.bed -b y1.bed" "time.txt" "intersect"
+bench_tests "bedtools map -a x1.bed -b y1.bed -c 1 -o count" "time.txt" "map"
+bench_tests "bedtools subtract -a x1.bed -b y1.bed" "time.txt" "subtract"
+# stats
+bench_tests "bedtools reldist -a x1.bed -b y1.bed" "time.txt" "reldist"
+bench_tests "bedtools jaccard -a x1.bed -b y1.bed" "time.txt" "jaccard"
+bench_tests "bedtools fisher -a x1.bed -b y1.bed -g genome1.txt" "time.txt" "fisher"
+#utils 
+bench_tests "bedtools makewindows -b x1.bed -w 100" "time.txt" "makewindows"
+```
+
+```{r}
+# Code to process data from previous chunks (above)
+
+# This is to import the data from bedtools (bash) and graph it
+times <- read_tsv("time.txt", col_names = c("expr", "time"))
+dat <- list(times, res_hard)
+names(dat) <- c("BEDTools", "valr")
+dat <- bind_rows(dat, .id = "package")
+
+mean_dat <- group_by(dat, expr, package) %>% 
+             summarize(mean = mean(time), se = sd(time))
+
+mean_dat$func <- ifelse(mean_dat$package == "bedtools", 
+                        mean_dat$expr, 
+                        str_split(mean_dat$expr, "\\(",  simplify = T)[, 1] %>% 
+  str_split(., "_", simplify = T) %>% 
+  .[,2])
+
+
+ggplot(mean_dat, aes(x=reorder(func, mean), y = mean, fill = package)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
+                width = .1, position = position_dodge(1)) +
+  scale_fill_brewer(palette = "Paired") + 
+  coord_flip() +
+  theme_bw() +
+  labs(
+    y='execution time (seconds)',
+    x='',
+    subtitle = paste(comma(n), "random 1 kilobase intervals,", 
+                     comma(nrep), "repetitions")) +
+  theme_classic() +
+  pub_theme +
+  theme(
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  )
+
+```
+
