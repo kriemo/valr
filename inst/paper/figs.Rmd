@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
 ```
 
 ```{r load_libs}
@@ -14,6 +15,7 @@ library(valr)
 library(tidyverse)
 library(cowplot)
 ```
+
 ## Figure 1
 
 ```{r, fig1}
@@ -23,7 +25,6 @@ library(cowplot)
 pub_theme <- theme(axis.text = element_text(size = 14),
                    plot.title = element_text(size = 14),
                    strip.text = element_text(size = 14))
-
 
 x <- tibble::tribble(
   ~chrom, ~start, ~end,
@@ -47,7 +48,7 @@ x <- tibble::tribble(
 
 b <- bed_glyph(bed_merge(x)) + pub_theme
 plot_grid(a, b, align = 'h', nrow = 1, labels="AUTO", scale = c(.9, .9))
-ggsave("glyphs.pdf", width = 8, height = 4)
+ggsave("figure1.pdf", width = 8, height = 4)
 
 ```
 
@@ -100,7 +101,7 @@ p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
   theme_classic()
 
 plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
-ggsave("tss.pdf", width = 3.5, height = 2.25)
+ggsave("figure2.pdf", width = 3.5, height = 2.25)
 ```
 
 ## Figure 3
@@ -257,6 +258,9 @@ bench_tests "bedtools jaccard -a x1.bed -b y1.bed" "time.txt" "jaccard"
 bench_tests "bedtools fisher -a x1.bed -b y1.bed -g genome1.txt" "time.txt" "fisher"
 #utils 
 bench_tests "bedtools makewindows -b x1.bed -w 100" "time.txt" "makewindows"
+
+# cleanup data
+rm -f x.bed y.bed x1.bed y1.bed genome1.txt genome.txt
 ```
 
 ```{r}
@@ -271,18 +275,18 @@ dat <- bind_rows(dat, .id = "package")
 mean_dat <- group_by(dat, expr, package) %>% 
              summarize(mean = mean(time), se = sd(time))
 
-mean_dat$func <- ifelse(mean_dat$package == "bedtools", 
+mean_dat$func <- ifelse(mean_dat$package == "BEDTools", 
                         mean_dat$expr, 
                         str_split(mean_dat$expr, "\\(",  simplify = T)[, 1] %>% 
   str_split(., "_", simplify = T) %>% 
   .[,2])
 
 
-ggplot(mean_dat, aes(x=reorder(func, mean), y = mean, fill = package)) +
+p <- ggplot(mean_dat, aes(x=reorder(func, mean), y = mean, fill = package)) +
   geom_bar(stat = "identity", position = "dodge") +
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
                 width = .1, position = position_dodge(1)) +
-  scale_fill_brewer(palette = "Paired") + 
+  scale_fill_grey() + 
   coord_flip() +
   theme_bw() +
   labs(
@@ -294,8 +298,12 @@ ggplot(mean_dat, aes(x=reorder(func, mean), y = mean, fill = package)) +
   pub_theme +
   theme(
     legend.text = element_text(size = 14),
-    legend.title = element_text(size = 14)
+    legend.title = element_blank(),
+    plot.subtitle = element_text(size = 10)
   )
+
+plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
+ggsave("figure3.pdf")
 
 ```
 
