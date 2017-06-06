@@ -48,7 +48,7 @@ x <- tibble::tribble(
 
 b <- bed_glyph(bed_merge(x)) + pub_theme
 plot_grid(a, b, align = 'h', nrow = 1, labels="AUTO", scale = c(.9, .9))
-ggsave("figure1.pdf", width = 8, height = 4)
+ggsave("figure1.pdf", width = 11.2, height = 5.6)
 
 ```
 
@@ -97,11 +97,11 @@ p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
   geom_point(size = 0.25) + geom_pointrange(sd_limits, size = 0.1) + 
   scale_x_continuous(labels = x_labels, breaks = x_breaks) + 
   xlab('Position (bp from TSS)') + ylab('Signal') + 
-  pub_theme +
-  theme_classic()
+  theme_classic() +
+  pub_theme
 
 plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
-ggsave("figure2.pdf", width = 3.5, height = 2.25)
+ggsave("figure2.pdf", width = 5.6, height = 4)
 ```
 
 ## Figure 3
@@ -303,7 +303,7 @@ p <- ggplot(mean_dat, aes(x=reorder(func, mean), y = mean, fill = package)) +
   )
 
 plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
-ggsave("figure3.pdf")
+ggsave("figure3.pdf", width = 5.6, height = 4)
 
 ```
 

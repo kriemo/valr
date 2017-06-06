@@ -91,7 +91,7 @@ Genomics, Intervals, BEDtools, reproducibility, R, RStudio
 
 Determining the correlation between sets of genomic features is a routine task in bioinformatics that requires sophisticated interval arithmetic. Command-line tools for interval analysis such as BEDtools \cite{quinlan_bedtools:_2010} and BEDOPS \cite{neph_bedops:_2012} are powerful tools that are central to many genomic analysis pipelines. A common workflow for genomic analysis begins with preprocessing interval analyses via command-line tools, followed by importing data into R for visualization and further statistical analyses. However, this workflow separation hinders exploratory data analysis, and the development reproducible research workflows built in the RMarkdown framework. 
 
-R packages developed for interval analysis include IRanges \cite{lawrence_software_2013}, GenometriCorr [@Favorov12], and bedr \cite{haider_bedr_2016}. IRanges is a Bioconductor package that provides specialized interval classes and methods to conduct interval arthimetic and is utilized extensively by Bioconductor packages. GenometriCorr provides a set of statistical tests to determine the relationships between interval sets and builds upon IRanges. bedr is a CRAN distributed package that provides wrapper functions to call BEDTools, BedOPS, and tabix functions providing out-of-memory support for interval analysis in R. These packages provide important functionality for interval analysis in R however they do not easily integrate with interactive data visualization features developed for R, such as Shiny\cite{chang_shiny_2017}, and the RStudio IDE. Additionally, the programmatic advances provided by the recent tidyverse suite of data processing and visualization tools (dplyr, purrr, broom, and ggplot2) do not easily interface with the R S4 objects implemented in many Bioconductor packages for data organization \cite{wickham_tidyverse_2017}. 
+R packages developed for interval analysis include IRanges \cite{lawrence_software_2013}, GenometriCorr \cite{favorov_exploring_2012}, and bedr \cite{haider_bedr_2016}. IRanges is a Bioconductor package that provides specialized interval classes and methods to conduct interval arthimetic and is utilized extensively by Bioconductor packages. GenometriCorr provides a set of statistical tests to determine the relationships between interval sets and builds upon IRanges. bedr is a CRAN distributed package that provides wrapper functions to call BEDTools, BedOPS, and tabix functions providing out-of-memory support for interval analysis in R. These packages provide important functionality for interval analysis in R however they do not easily integrate with interactive data visualization features developed for R, such as Shiny\cite{chang_shiny_2017}, and the RStudio IDE. Additionally, the programmatic advances provided by the recent tidyverse suite of data processing and visualization tools (dplyr, purrr, broom, and ggplot2) do not easily interface with the R S4 objects implemented in many Bioconductor packages for data organization \cite{wickham_tidyverse_2017}. 
 
 We therefore sought to develop an R package that allows seamless and extensible interval arithmetic built to incorporate new R programming, visualization, and interactivity features.
 
@@ -189,11 +189,6 @@ And this glyph illustrates \texttt{bed\_merge()}:
 \KeywordTok{bed_glyph}\NormalTok{(}\KeywordTok{bed_merge}\NormalTok{(x))}
 \end{Highlighting}
 
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=\textwidth]{glyphs.pdf}
-\caption{\label{fig:Figure 1}Visualizing interval operations in valr with \texttt{bed\_glyph()}.} 
-\end{figure}
 
 \subsubsection{Reproducible reports}\label{reproducible-reports}
 
@@ -276,17 +271,14 @@ will respect groupings in the input intervals.
 
 Columns in \texttt{BEDtools} are referred to by position:
 
-\begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# calculate the mean of column 6 for intervals in `b` that overlap with `a`}
 \KeywordTok{bedtools} \NormalTok{map -a a.bed -b b.bed -c 6 -o mean}
 \end{Highlighting}
-\end{Shaded}
 
 In \texttt{valr}, columns are referred to by name and can be used in
 multiple name/value expressions for summaries.
 
-\begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# calculate the mean and variance for a `value` column}
 \KeywordTok{bed_map}\NormalTok{(a, b, }\DataTypeTok{.mean =} \KeywordTok{mean}\NormalTok{(value), }\DataTypeTok{.var =} \KeywordTok{var}\NormalTok{(value))}
@@ -294,55 +286,11 @@ multiple name/value expressions for summaries.
 \CommentTok{# report concatenated and max values for merged intervals}
 \KeywordTok{bed_merge}\NormalTok{(a, }\DataTypeTok{.concat =} \KeywordTok{concat}\NormalTok{(value), }\DataTypeTok{.max =} \KeywordTok{max}\NormalTok{(value))}
 \end{Highlighting}
-\end{Shaded}
 
 
 \subsection{API}\label{api}
 The major functions available in valr are shown in Table \ref{tab:tools}. 
 
-\begin{table}[h!]
-\hrule \vspace{0.1cm}
-\caption{\label{tab:tools} An overview of major functions available in valr.}
-\centering
-\begin{tabular}{lr}
- \bfseries \large Function Name & \bfseries  \large Purpose \\ 
-  \hline
-\bfseries Reading Data & \\ 
-  read\_bed & Read BED files \\ 
-  read\_bedgraph & Read bedGraph files \\
-  read\_narrowpeak & Read narrowPeak files \\
-  read\_broadpeak & Read broadPeak files \\
-\bfseries Interval Transformation \\ 
-  bed\_slop & Expand interval coordinates \\
-  bed\_shift & Shift interval coordinates \\
-  bed\_flank & Create flanking intervals \\
-  bed\_merge & Merge overlapping intervals \\
-  bed\_cluster & Identify (but not merge) overlapping intervals \\
-  bed\_complement & Create intervals not covered by a query \\
-\bfseries Interval Comparison & \\ 
-  bed\_intersect & Report intersecting intervals from x and y tbls \\ 
-  bed\_cluster & Cluster neighboring intervals \\
-  bed\_map & Apply functions to selected columns for overlapping intervals \\
-  bed\_subtract & Remove intervals based on overlaps \\
-  bed\_window & Find overlapping intervals within a window \\
-  bed\_closest & Find the closest intervals independent of overlaps \\
-\bfseries Randomizing intervals & \\
-  bed\_random & Generate random intervals from an input genome \\
-  bed\_shuffle & Shuffle the coordinates of input intervals \\
-\bfseries Interval statistics & \\
-  bed\_fisher, bed\_projection & Calculate significance of overlaps between two sets of intervals \\
-  bed\_reldist & Quantify relative distances between sets of intervals \\
-  bed\_absdist & Quantify absolute distances between sets of intervals \\
-  bed\_jaccard &Quantify extent of overlap between two sets of intervals \\
-\bfseries Utilities &  \\ 
-  bed\_glyph & Visualize the actions of valr functions \\ 
-  bound\_intervals & Constrain intervals to a genome reference \\
-  bed\_makewindows & Subdivide intervals \\
-  bed12\_to\_exons & Convert BED12 to BED6 format \\
-  interval\_spacing & Calculate spacing between intervals \\
-  db\_ucsc, db\_ensembl & Access remote databases \\
-  \end{tabular}
-\end{table}
 
 \subsection*{Summarizing interval coverage across genomic features}
 
@@ -450,14 +398,6 @@ illustrates histone density surrounding TSSs (Figure 2\ref{fig:Figure 2}).
 \StringTok{  }\KeywordTok{theme_classic}\NormalTok{()}
 \end{Highlighting}
 
-
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=\textwidth]{tss.pdf}
-\caption{\label{fig:Figure 2}Meta-analysis of signals relative to genomic features with valr. \textnormal{Summarized coverage of human H3K4Me3 Chip-Seq coverage across positive strand transcription start sites. Data presented +/- SEM.}}
-\end{figure}
-
-
 \subsection*{Interval statistics}\label{interval-statistics}
 
 Estimates of significance for interval overlaps can be obtained by
@@ -509,12 +449,6 @@ Here we examine the overlap of repeat classes in the human genome (on
 \subsection*{Benchmarking against bedtools}
 In order to ensure that valr performs fast enough to enable interactive analysis, key functionality is implemented in C++. We benchmarked major valr functions against corresponding commands in BEDTools. valr operates on tables already preloaded into RAM, whereas BEDTools performs file-reading, processing, and writing. To compare valr against bedtools we generated two files containing 1 million random 1 Kbp intervals derived from the human genome. For valr functions, we timed reading the table into R (e.g. with read\_bed()) and performing the respective function. For BEDTools commands we timed executing the command with the output written to /dev/null. valr functions performed similarly or slightly faster than BEDTools commands with the exception of the bed\_map and bed\_fisher (Figure 3\ref{fig:Figure 3}) . 
 
-\begin{figure}[!htb]
-\centering
-\includegraphics[width=\textwidth]{benchmarks.pdf}
-\caption{\label{fig:Figure 3} Performance of major valr functionality benchmarked against BEDTools \textnormal{Timings calculated using microbenchmark and GNU time commands for valr and BEDTools respectively (A).}}
-\end{figure}
-
 \section*{Summary} % Optional - only if NO new datasets are included
 valr provides a flexible framework for interval arithmetic in R/Rstudio. valr functions are written with a simple and terse syntax that promotes flexible interactive analysis. Additionally by providing an easy-to-use interface for interval arithmetic in R, valr is also a useful teaching tool to introduce the analyses necessary to investigate correlations between genomic intervals, without requiring familiarity with the command-line.
 
@@ -548,6 +482,82 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 
 \section*{Figures}
 
+%%%% Figure 1 %%%%
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=1\textwidth]{figure1.pdf}
+\caption{\label{fig:Figure 1}Visualizing interval operations in valr with \texttt{bed\_glyph()}.} 
+\end{figure}
+
+%%%% Figure 2 %%%%
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.5\textwidth]{figure2.pdf}
+\caption{\label{fig:Figure 2}Meta-analysis of signals relative to genomic features with valr. \textnormal{Summarized coverage of human H3K4Me3 Chip-Seq coverage across positive strand transcription start sites. Data presented +/- SEM.}}
+\end{figure}
+
+%%%% Figure 3 %%%%
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=0.5\textwidth]{figure3.pdf}
+\caption{\label{fig:Figure 3} Performance of major valr functionality benchmarked against BEDTools \textnormal{Timings calculated using microbenchmark and GNU time commands for valr and BEDTools respectively (A).}}
+\end{figure}
+
+
+%%%% Table 1 %%%%
+
+\begin{table}[h!]
+\hrule \vspace{0.1cm}
+\caption{\label{tab:tools} An overview of major functions available in valr.}
+\centering
+\begin{tabular}{lr}
+ \bfseries \large Function Name & \bfseries  \large Purpose \\ 
+  \hline
+\bfseries Reading Data & \\ 
+  read\_bed & Read BED files \\ 
+  read\_bedgraph & Read bedGraph files \\
+  read\_narrowpeak & Read narrowPeak files \\
+  read\_broadpeak & Read broadPeak files \\
+\bfseries Interval Transformation \\ 
+  bed\_slop & Expand interval coordinates \\
+  bed\_shift & Shift interval coordinates \\
+  bed\_flank & Create flanking intervals \\
+  bed\_merge & Merge overlapping intervals \\
+  bed\_cluster & Identify (but not merge) overlapping intervals \\
+  bed\_complement & Create intervals not covered by a query \\
+\bfseries Interval Comparison & \\ 
+  bed\_intersect & Report intersecting intervals from x and y tbls \\ 
+  bed\_cluster & Cluster neighboring intervals \\
+  bed\_map & Apply functions to selected columns for overlapping intervals \\
+  bed\_subtract & Remove intervals based on overlaps \\
+  bed\_window & Find overlapping intervals within a window \\
+  bed\_closest & Find the closest intervals independent of overlaps \\
+\bfseries Randomizing intervals & \\
+  bed\_random & Generate random intervals from an input genome \\
+  bed\_shuffle & Shuffle the coordinates of input intervals \\
+\bfseries Interval statistics & \\
+  bed\_fisher, bed\_projection & Calculate significance of overlaps between two sets of intervals \\
+  bed\_reldist & Quantify relative distances between sets of intervals \\
+  bed\_absdist & Quantify absolute distances between sets of intervals \\
+  bed\_jaccard &Quantify extent of overlap between two sets of intervals \\
+\bfseries Utilities &  \\ 
+  bed\_glyph & Visualize the actions of valr functions \\ 
+  bound\_intervals & Constrain intervals to a genome reference \\
+  bed\_makewindows & Subdivide intervals \\
+  bed12\_to\_exons & Convert BED12 to BED6 format \\
+  interval\_spacing & Calculate spacing between intervals \\
+  db\_ucsc, db\_ensembl & Access remote databases \\
+  \end{tabular}
+\end{table}
+
+
+
+%%%%%%%%%%%% Previous Figures %%%%%%%%%%%
+
+
+%%%% TSS H3K4me3 example %%%%
 \begin{figure}
 \centering
     \begin{subfigure}[b]{0.45\textwidth}
@@ -650,6 +660,11 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 % We hope you find the F1000Research Overleaf template useful,
 % please let us know if yo\begin{Shaded}
 
+%%%% DNA methylation example %%%%
+
+\subsection{Get the public datasets from
+UCSC}\label{get-the-public-datasets-from-ucsc}
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(dplyr)}
@@ -660,10 +675,6 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 \KeywordTok{library}\NormalTok{(gridExtra)}
 \end{Highlighting}
 \end{Shaded}
-
-\subsection{Get the public datasets from
-UCSC}\label{get-the-public-datasets-from-ucsc}
-
 
 \begin{Shaded}
 \begin{Highlighting}[]
