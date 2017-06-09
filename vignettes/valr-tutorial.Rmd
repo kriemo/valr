@@ -1,0 +1,167 @@
+---
+title: "valr tutorial"
+author: "Kent Riemondy RBI"
+date: "June 6, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## valr tutorial
+  Based on the BEDTools [tutorial](http://quinlanlab.org/tutorials/bedtools/bedtools.html)
+
+First install `valr` and the `valrdata` package which contains built in datasets. 
+
+```{r, eval = F}
+install.packages("valr")
+library(valr)
+
+#install.packages("devtools")
+devtools::install_github("rnabioco/valrdata")
+library(valrdata)
+```
+
+### Datafiles for tutorial
+   In the `valrdata` package is a built-in dataset called `dnase_data`. This dataset is a list of 20 bed files containing BED intervals of DNase-I hypersensitivity sites in the human genome from different tissues. 
+   
+```{r datafiles}
+names(dnase_data)
+
+dnase_data$`Brain-1`
+```
+
+Another dataset is the `tutorial_files` dataset, which is a list of 4 BED datasets and 1 genome file. We will uses these datasets to introduce `valr`. To learn more about these files use the R help menu
+
+```{r, eval = F}
+?tutorial_files
+# bed files
+cpg <- tutorial_files$cpg
+exons <- tutorial_files$exons
+gwas <- tutorial_files$gwas
+hesc_chromHmm <- tutorial_files$hesc_chromHmm
+
+#genome file
+genome <- tutorial_files$genome
+```
+
+Each dataset was read into R using the `read_bed()`, `read_bedgraph()` or `read_genome()` functions. These functions accept either a filepath or a URL pointing to file. 
+
+```{r read_bed}
+# example 3 field bed file located in valr github repo
+read_bed("https://github.com/rnabioco/valr/raw/master/inst/extdata/3fields.bed.gz")
+```
+
+### Getting help
+
+valr functions are documented through the R help menu, or on a documentation [page](http://rnabioco.github.io/valr). The examples at the bottom of each help menu demonstrate the basic usage of each function.
+
+```{r}
+?bed_intersect
+?bed_merge
+?bed_subtract
+```
+
+### bed_intersect()
+
+`bed_intersect()` compares tbls and identifies all the intervals in the first tbl that intersect with the second tbl. 
+
+```{r glyph, echo = F}
+x <- trbl_interval(
+  ~chrom, ~start, ~end,
+  'chr1', 25,      50,
+  'chr1', 100,     125
+)
+
+y <- trbl_interval(
+  ~chrom, ~start, ~end,
+  'chr1', 30,     75
+)
+
+bed_glyph(bed_intersect(x, y))
+```
+
+### Default behavior
+By default `bed_intersect()` reports only overlapping intervals.
+
+```{r}
+
+cpg
+exons
+
+bed_intersect(cpg, exons)
+```
+
+In contrast to BEDTools, adjacent intervals are also reported. These intervals can be identified as having `.overlap == 0`
+ 
+```{r}
+# keep only bookended intervals
+bed_intersect(cpg, exons) %>% 
+  filter(.overlap == 0)
+
+# do not include bookended intervals
+bed_intersect(cpg, exons) %>% 
+  filter(.overlap >= 0)
+```
+The original interval from `cpg` is returned with colnames suffixed by `.x` with the intersecting interval from `exons` suffixed by `.y`. An additional column `.overlap` is also returned that indicates the number of overlappin basepairs between the two intervals. Note that this default behavior is similar to running `bedtools intersect -wo -a cpg.bed -b exons.bed`. 
+
+### Reporting only the intersecting intervals
+To report only the intervals in `cpg` that are found in `exons` without additional columns simply pipe the output to `dplyr::select()`. 
+
+```{r wa_option}
+library(dplyr)
+bed_intersect(cpg, exons) %>% 
+  select(chrom:name.x) %>% 
+  unique()
+```
+
+This is similar to runnning `bedtools intersect -wa -a cpg.bed -b exons.bed`
+
+### Report only portion of interval that intersects
+
+To obtain only the portion of the intervals in `cpg` that intersect with `exons`. This is similar to runnning `bedtools intersect -a cpg.bed -b exons.bed`.
+
+```{r default_bed_intersect}
+bed_intersect(cpg, exons) %>% 
+  mutate(start = pmax(start.x, start.y),
+         end = pmin(end.x, end.y)) %>% 
+  select(chrom, start, end, name.x)
+```
+
+### Counting the number of overlapping features
+To return a count of the number of overlapping features we can use the `group_by` and `summarize` functions from `dplyr`. `summarize` can also be used to perform arbitrary operations on the intersecting groups. 
+
+```{r count}
+bed_intersect(cpg, exons) %>% 
+  group_by(chrom, start.x, end.x) %>% 
+  summarize(count = n())
+
+bed_intersect(cpg, exons) %>% 
+  group_by(chrom, start.x, end.x) %>% 
+  summarize(count = n(), 
+            names = concat(name.y))
+```
+
+
+### Find features that don't overlap
+
+```{r no_overlap}
+bed_intersect(cpg, exons, invert = T)
+```
+
+### Require a minimal fraction of overlap
+
+```{r frac}
+#require that at least half of cpg intervals be overlapped
+bed_intersect(cpg, exons) %>% 
+  mutate(fraction_a = .overlap / (end.x - start.x)) %>% 
+  filter(fraction_a > 0.5)
+
+# require that at least half of b intervals be overlapped
+bed_intersect(cpg, exons) %>% 
+  mutate(fraction_b = .overlap / (end.y - start.y)) %>% 
+  filter(fraction_b > 0.5)
+```
+
+

@@ -2,7 +2,7 @@
 title: "F1000 paper figures"
 author: "Kent Riemondy RBI"
 date: "June 6, 2017"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -16,15 +16,17 @@ library(tidyverse)
 library(cowplot)
 ```
 
+
 ## Figure 1
 
 ```{r, fig1}
 
 # theme to make pretty for publication
 
-pub_theme <- theme(axis.text = element_text(size = 14),
-                   plot.title = element_text(size = 14),
-                   strip.text = element_text(size = 14))
+pub_theme <- theme(axis.text = element_text(size = 20),
+                   axis.title = element_text(size = 20),
+                   plot.title = element_text(size = 20),
+                   strip.text = element_text(size = 20))
 
 x <- tibble::tribble(
   ~chrom, ~start, ~end,
@@ -207,7 +209,7 @@ sts <- boxplot.stats(res$time)$stats
 
 ```
 
-```{bash}
+```{bash, eval = F}
 # Function to benchmark any bash command
 repeats=10
 
@@ -272,38 +274,180 @@ dat <- list(times, res_hard)
 names(dat) <- c("BEDTools", "valr")
 dat <- bind_rows(dat, .id = "package")
 
-mean_dat <- group_by(dat, expr, package) %>% 
-             summarize(mean = mean(time), se = sd(time))
+#mean_dat <- group_by(dat, expr, package) %>% 
+#             summarize(mean = mean(time), se = sd(time))
 
-mean_dat$func <- ifelse(mean_dat$package == "BEDTools", 
-                        mean_dat$expr, 
-                        str_split(mean_dat$expr, "\\(",  simplify = T)[, 1] %>% 
+dat$func <- ifelse(dat$package == "BEDTools", 
+                   dat$expr, 
+                   str_split(dat$expr, "\\(",  simplify = T)[, 1] %>% 
   str_split(., "_", simplify = T) %>% 
   .[,2])
 
+# remove makewindows, really throws off proportion of graph
+dat <- filter(dat, func != "makewindows")
+valr_data <- filter(dat, package == "valr")
 
-p <- ggplot(mean_dat, aes(x=reorder(func, mean), y = mean, fill = package)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
-                width = .1, position = position_dodge(1)) +
-  scale_fill_grey() + 
+plot_a <- ggplot(res, aes(x=reorder(expr, time), y = time)) +
+  geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA, fill = RColorBrewer::brewer.pal(3, "Set1")[2]) +
   coord_flip() +
   theme_bw() +
   labs(
     y='execution time (seconds)',
     x='',
-    subtitle = paste(comma(n), "random 1 kilobase intervals,", 
-                     comma(nrep), "repetitions")) +
+    subtitle=paste0(comma(n), " random x/y intervals,\n", comma(nrep), " repetitions")) +
   theme_classic() +
   pub_theme +
   theme(
     legend.text = element_text(size = 14),
     legend.title = element_blank(),
-    plot.subtitle = element_text(size = 10)
+    legend.position = "none",
+    plot.subtitle = element_text(size = 18),
+    axis.text.x = element_text(angle = 90)
   )
 
-plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
-ggsave("figure3.pdf", width = 5.6, height = 4)
+
+plot_b <- ggplot(dat, aes(x=reorder(func, time), y = time, fill = package)) +
+  geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA) +
+  scale_fill_brewer(palette = "Set1") + 
+  coord_flip() +
+  theme_bw() +
+  labs(
+    y='execution time (seconds)',
+    x='') +
+  theme_classic() +
+  pub_theme +
+  theme(
+    legend.text = element_text(size = 18),
+    legend.title = element_blank(),
+    legend.position = "top",
+    axis.text.x = element_text(angle = 90)
+  )
+
+plot_grid(plot_a, plot_b, align = 'h', nrow = 1, labels="AUTO", label_size = 28)
+ggsave("figure3.pdf", width = 20, height = 10)
 
 ```
 
+
+
+## Code demonstrations
+
+```{r}
+library(valr)
+# function to retrieve path to example data
+bed_filepath <- valr_example("3fields.bed.gz") 
+read_bed(bed_filepath) 
+
+#using URL
+read_bed("https://github.com/rnabioco/valr/raw/master/inst/extdata/3fields.bed.gz")
+```
+
+Using mysql
+```{r, warnings = F}
+library(dplyr, warn.conflicts = F)
+hg19 <- db_ucsc("hg19")
+tbl(hg19, "refGene")
+```
+
+
+### Interval statistics
+
+Estimates of significance for interval overlaps can be obtained by combining `bed_shuffle()`, `bed_random()` and the `sample_` functions from `dplyr` with interval statistics in `valr`.
+
+Here we examine the overlap of repeat classes in the human genome (on `chr22` only, for simplicity) using `bed_jaccard()`.
+
+```{r reldist_shuffle, message = FALSE, warning = FALSE}
+
+repeats <- read_bed(valr_example('hg19.rmsk.chr22.bed.gz'), n_fields = 6) 
+genome <- read_genome(valr_example('hg19.chrom.sizes.gz'))
+genes <- read_bed12(valr_example('hg19.refGene.chr22.bed.gz'))
+exons <- bed12_to_exons(genes)
+
+shuffle_intervals <- function(n, .data, genome) {
+  replicate(n, bed_shuffle(.data, genome), simplify = FALSE) %>%
+    bind_rows(.id = 'rep') %>%
+    group_by(rep) %>% nest()
+}
+
+shuffled <- shuffle_intervals(n = 100, repeats, genome) %>%
+  mutate(jaccard = data %>%
+           map(bed_jaccard, repeats) %>%
+           map_dbl("jaccard"))
+  
+shuffled
+
+bed_jaccard(repeats, exons)
+```
+
+
+## Correlations among DNase I hypersensitive sites 
+
+Here we use `bed_jaccard` for a large-scale comparison of related datasets. As shown in the [`BEDtools` tutorial](http://quinlanlab.org/tutorials/bedtools/bedtools.html), we can measure the similarity of DNaseI hypersensitivity sites for 20 fetal tissue samples. 
+
+This data was taken from [Maurano *et al.* Systematic Localization of Common Disease-Associated Variation in Regulatory DNA. (2012) *Science*](www.sciencemag.org/content/337/6099/1190.short).
+
+```{r init, warning = FALSE, message = FALSE}
+library(valr)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(broom)
+library(stringr)
+library(ggplot2)
+library(ggrepel)
+library(ComplexHeatmap)
+```
+
+First read all 20 BED files containing DNase I hypersensitivity sites from 20 fetal tissues.
+
+```{r read_files, eval = F}
+dnase_files <- list.files('data/dnasei',pattern = 'merge.bed.gz', full.names = TRUE)
+data <- dnase_files %>% map(read_bed, n_fields = 4)
+```
+
+Then generate a 20x20 table containing a Jaccard statistic for each of the 400 pairwise comparisons.
+
+```{r jaccard-mat, eval = F}
+res <- data %>%
+  cross2(.,.) %>%
+  map(lift(bed_jaccard)) %>% 
+  map("jaccard") %>%
+  flatten_dbl() %>%
+  matrix(nrow = 20, ncol = 20)
+```
+
+We also need to generate labels for the table from the file names.
+
+```{r jaccard-names, eval = F}
+# names are tissue + sample_num
+col_names <- dnase_files %>%
+  str_split('/') %>% map(`[[`, 3) %>%
+  str_split('\\.') %>% map(`[[`, 1) %>%
+  str_split('-') %>% map(`[[`, 1) %>%
+  flatten_chr() %>%
+  str_replace('^f', '') %>%
+  str_c(str_c('-', seq(length(.))))
+
+colnames(res) <- col_names
+rownames(res) <- col_names
+```
+
+Now the Jaccard coefficients can be visualized in heatmap form.
+
+```{r jaccard-heatmap, fig.cap='Heatmap of Jaccard scores', fig.align='center', fig.width=8, eval = F}
+Heatmap(res, color_space = 'Blues')
+```
+
+Finally we can do some PCA analysis on the Jaccard coefficients to identify clusters of related cell types.
+
+```{r jaccard-PCA, fig.cap='PCA analysis of Jaccard scores', fig.align='center', fig.width=8, eval = F}
+pca <- broom::tidy(prcomp(res)) %>% as_data_frame()
+
+pca_comps <- filter(pca, PC <= 2) %>%
+  tidyr::spread(PC, value) %>%
+  setNames(c('label','PC1','PC2'))
+
+ggplot(pca_comps, aes(PC1, PC2)) +
+  geom_point(size = 3, color = 'red') +
+  geom_text_repel(aes(label = label))
+```
