@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Welcome to Overleaf --- just edit your article on the left,
-% and we'll compile it for you on the right. If you give 
+% and we'll compile it for you on the right. If you give
 % someone the link to this page, they can edit at the same
 % time. See the help menu above for more info. Enjoy!
 %
@@ -23,7 +23,7 @@
 % \usepackage[round]{natbib}
 % \let\cite\citep
 
-%% syntax highlighting style kate 
+%% syntax highlighting style kate
 \renewcommand{\KeywordTok}[1]{\textbf{{#1}}}
 \renewcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.50,0.00,0.00}{{#1}}}
 \renewcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,1.00}{{#1}}}
@@ -77,8 +77,8 @@
 
 % 300 words
 \begin{abstract}
-New tools for genome internal analysis enable analysis of large genomic data sets
-Availability of large genomic data sets. Need for new tools for exploratoratory data analysis. valr enables genomic interval analysis in the RStudio environment.
+New tools for genome interval analysis enable analysis of large genomic data sets. The size and complexity of genomic data continues to increase highlighting the need for novels tools for exploratory data analysis. \texttt{valr} enables flexible and efficient genomic interval analysis in the RStudio environment. \texttt{valr} can be used for interactive exploratory analyses or incorporated into existing analysis pipelines.
+
 \end{abstract}
 
 \section*{Keywords}
@@ -89,42 +89,71 @@ Genomics, Intervals, BEDtools, reproducibility, R, RStudio
 \pagestyle{main}
 \section*{Introduction}
 
-Determining the correlation between sets of genomic features is a routine task in bioinformatics that requires sophisticated interval arithmetic. Command-line tools for interval analysis such as BEDtools \cite{quinlan_bedtools:_2010} and BEDOPS \cite{neph_bedops:_2012} are powerful tools that are central to many genomic analysis pipelines. A common workflow for genomic analysis begins with preprocessing interval analyses via command-line tools, followed by importing data into R for visualization and further statistical analyses. However, this workflow separation hinders exploratory data analysis, and the development reproducible research workflows built in the RMarkdown framework. 
+A routine task in bioinformatics is determining the relationships between sets of genomic intervals. Frequent tasks include for example, identifying SNPs located within geneic regions, annotating regions enriched for specific nucleic acid binding proteins, or computing read density across a set of exons. Command-line tools for interval analysis such as BEDtools \cite{quinlan_bedtools:_2010} and BEDOPS \cite{neph_bedops:_2012} enable analyses of genome-wide datasets and are central components of analysis pipelines. A common workflow for genomic analysis begins with preprocessing interval analyses via command-line tools, followed by importing data into R for visualization and further statistical analyses. However, this workflow separation hinders exploratory data analysis, and the development reproducible research workflows built in the RMarkdown framework.
 
-R packages developed for interval analysis include IRanges \cite{lawrence_software_2013}, GenometriCorr \cite{favorov_exploring_2012}, and bedr \cite{haider_bedr_2016}. IRanges is a Bioconductor package that provides specialized interval classes and methods to conduct interval arthimetic and is utilized extensively by Bioconductor packages. GenometriCorr provides a set of statistical tests to determine the relationships between interval sets and builds upon IRanges. bedr is a CRAN distributed package that provides wrapper functions to call BEDTools, BedOPS, and tabix functions providing out-of-memory support for interval analysis in R. These packages provide important functionality for interval analysis in R however they do not easily integrate with interactive data visualization features developed for R, such as Shiny\cite{chang_shiny_2017}, and the RStudio IDE. Additionally, the programmatic advances provided by the recent tidyverse suite of data processing and visualization tools (dplyr, purrr, broom, and ggplot2) do not easily interface with the R S4 objects implemented in many Bioconductor packages for data organization \cite{wickham_tidyverse_2017}. 
-
-We therefore sought to develop an R package that allows seamless and extensible interval arithmetic built to incorporate new R programming, visualization, and interactivity features.
+Previous R packages developed for interval analysis include IRanges \cite{lawrence_software_2013}, bedr \cite{haider_bedr_2016}, and GenometriCorr \cite{favorov_exploring_2012}. IRanges is a Bioconductor package that provides specialized interval classes and methods to perform interval arithmetic in R and is used by many Bioconductor packages. In contrast, bedr is a CRAN distributed package that provides wrapper R functions to call BEDTools, BedOPS, and tabix command-line utilities providing out-of-memory support for interval analysis in R. GenometriCorr provides a set of statistical tests to determine the relationships between interval sets using IRanges data structures. These packages provide important functionality for processing and statistical inference of interval data, but they do not easily integrate with interactive data visualization features developed for R, such as Shiny\cite{chang_shiny_2017}, and the RStudio IDE. Additionally, the R S4 data structures implemented by IRanges do not easily interface with the recent advances provided by the popular tidyverse suite of data processing and visualization tools (dplyr, purrr, broom, and ggplot2) \cite{wickham_tidyverse_2017}. We therefore sought to develop an flexible R package for genomic interval arithmetic built to incorporate new R programming, visualization, and interactivity features.
 
 \section*{Methods}
+
 \subsection*{Implementation}
-valr is implemented as an R package that makes extensive use of dplyr, a popular package that provides a flexible and high-performance framework for data manipulation \cite{wickham_dplyr_2016}. Computationally intensive functions in valr are written in C++ using Rcpp to enable fluid and quick interactive analysis of large datasets\cite{eddelbuettel_rcpp_2011}. 
+valr is an R package that makes extensive use of dplyr, a flexible and high-performance framework for data manipulation in R \cite{wickham_dplyr_2016}. Compute intensive functions in valr are written in C++ using Rcpp to enable fluid interactive analysis of large datasets\cite{eddelbuettel_rcpp_2011}. Interval intersections and related operations utilize an interval tree algorithm to efficently process large datasets\cite{cormen_2001}. BED files are imported and handled in R as data\_frame objects, requiring minimal pre or post-processing to integrate with additional R packages or command line tools.
 
 \subsection*{Operation}
 valr is distributed as part of the CRAN R package repository and is compatible with Mac OS X, Windows, and major Linux operating systems. Package dependencies and system requirements are documented on the valr CRAN repository (\url{https://cran.r-project.org/web/packages/valr/index.html}).
 
-\section*{Use Cases} % Optional - only if NO new datasets are included
-To demonstrate the functionality and utility of \textbf{valr} presented below are some common use cases for genomic interval analysis. 
+\section*{Use Cases}
+To demonstrate the functionality and utility of \textbf{valr}, presented below is a basic tutorial for using valr and additional common use cases for genomic interval analysis.
 
-\subsection{Basic Usage}
+\subsection*{Basic Usage}
 
-\subsubsection{Input data}\label{input-data}
+\subsubsection*{Input data}\label{input-data}
 
-\texttt{valr} provides a set of functions to read BED, BEDgraph, and VCF into R as convenient \texttt{tbl\_dfs()} dataframe objects. All tbls will have \texttt{chrom}, \texttt{start}, and\texttt{end} columns, and tbls from multi-column formats will have additional pre-determined column names. 
-
-Additionally \texttt{valr} supports connections to remote databases to programatically access the UCSC and Ensembl databases. 
-
-Show examples of read bed with files, url, and readucsc.
-
-\subsection{Terse Syntax}
-
-The functions in \texttt{valr} have similar names to their
-\texttt{BEDtools} counterparts, and so will be familiar to users of
-the \texttt{BEDtools} suite. 
-
-Similar to pybedtools\cite{dale_pybedtools:_2011}, a python wrapper for BEDTools, valr has a terse syntax. Shown below is an example of how to find all SNPs within 1 Kbp of genes using valr.
+\texttt{valr} provides a set of functions to read BED, BEDgraph, and VCF formats into R as convenient \texttt{tbl\_dfs()} dataframe objects. All tbls will have \texttt{chrom}, \texttt{start}, and \texttt{end} columns, and tbls from multi-column formats will have additional pre-determined column names. Standards methods for importing data (e.g. \texttt{read.table}, \texttt{readr::read\_tsv}) are also supported provided the contructed dataframes contain the requiste column names (\texttt{chrom}, \texttt{start}, \texttt{end}). Additionally \texttt{valr} supports connections to remote databases to programatically access the UCSC and Ensembl databases via the \texttt{db\_ucsc} and \texttt{db\_ensembl} functions.
 
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(valr)}
+\CommentTok{# function to retrieve path to example data}
+\NormalTok{bed_filepath <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"3fields.bed.gz"}\NormalTok{) }
+\KeywordTok{read_bed}\NormalTok{(bed_filepath) }
+\CommentTok{#> # A tibble: 10 x 3}
+\CommentTok{#>    chrom  start    end}
+\CommentTok{#>    <chr>  <int>  <int>}
+\CommentTok{#>  1  chr1  11873  14409}
+\CommentTok{#>  2  chr1  14361  19759}
+\CommentTok{#>  3  chr1  14406  29370}
+\CommentTok{#>  4  chr1  34610  36081}
+\CommentTok{#>  5  chr1  69090  70008}
+\CommentTok{#>  6  chr1 134772 140566}
+\CommentTok{#>  7  chr1 321083 321115}
+\CommentTok{#>  8  chr1 321145 321207}
+\CommentTok{#>  9  chr1 322036 326938}
+\CommentTok{#> 10  chr1 327545 328439}
+
+\CommentTok{#using URL}
+\KeywordTok{read_bed}\NormalTok{(}\StringTok{"https://github.com/rnabioco/valr/raw/master/inst/extdata/3fields.bed.gz"}\NormalTok{)}
+\CommentTok{#> # A tibble: 10 x 3}
+\CommentTok{#>    chrom  start    end}
+\CommentTok{#>    <chr>  <int>  <int>}
+\CommentTok{#>  1  chr1  11873  14409}
+\CommentTok{#>  2  chr1  14361  19759}
+\CommentTok{#>  3  chr1  14406  29370}
+\CommentTok{#>  4  chr1  34610  36081}
+\CommentTok{#>  5  chr1  69090  70008}
+\CommentTok{#>  6  chr1 134772 140566}
+\CommentTok{#>  7  chr1 321083 321115}
+\CommentTok{#>  8  chr1 321145 321207}
+\CommentTok{#>  9  chr1 322036 326938}
+\CommentTok{#> 10  chr1 327545 328439}
+\end{Highlighting}
+
+
+\subsubsection*{Simple example}
+
+The functions in \texttt{valr} have similar names to their
+\texttt{BEDtools} counterparts, and so will be familiar to users of
+the \texttt{BEDtools} suite. Also, similar to pybedtools\cite{dale_pybedtools:_2011}, a python wrapper for \texttt{BEDTools}, \texttt{valr} has a terse syntax. For example, shown below is an example of how to find all intergenic SNPs within 1 kilobase of genes using \texttt{valr}.
+
+\begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(dplyr)}
 
 \NormalTok{snps <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.snps147.chr22.bed.gz'}\NormalTok{), }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{)}
@@ -154,12 +183,9 @@ Similar to pybedtools\cite{dale_pybedtools:_2011}, a python wrapper for BEDTools
 \CommentTok{#> # ... with 275 more rows}
 \end{Highlighting}
 
-\subsubsection{Visual documentation}\label{visual-documentation}
-
-The \texttt{bed\_glyph()} tool illustrates the results of operations in
-\texttt{valr}, similar to those found in the \texttt{BEDtools}
-documentation. Shown below is the code to produce glyphs that illustrate the result of intersecting \texttt{x}
-and \texttt{y} intervals with \texttt{bed\_intersect()} , and the result of merging \texttt{x} intervals with \texttt{bed\_merge()} (Figure 1 \ref{fig:Figure 1}). 
+\subsubsection*{Visual documentation}\label{visual-documentation}
+By conducting interval arthimetic entirely in R, \texttt{valr} is also an effective teaching tool for introducing interval analysis to early-stage analysts without requiring familiarity with both command-line tools and R. To aid in demonstrating the interval operations available in \texttt{valr}, we developed the \texttt{bed\_glyph()} tool which produces plots demonstrating the input and output of operations in \texttt{valr} in a manner similar to those found in the \texttt{BEDtools} documentation.
+Shown below is the code required to produce glyphs displaying the results of intersecting \texttt{x} and \texttt{y} intervals with \texttt{bed\_intersect()} , and the result of merging \texttt{x} intervals with \texttt{bed\_merge()} (Figure 1 \ref{fig:Figure 1}).
 
 \begin{Highlighting}[]
 \NormalTok{x <-}\StringTok{ }\NormalTok{tibble::}\KeywordTok{tribble}\NormalTok{(}
@@ -188,30 +214,17 @@ And this glyph illustrates \texttt{bed\_merge()}:
 
 \KeywordTok{bed_glyph}\NormalTok{(}\KeywordTok{bed_merge}\NormalTok{(x))}
 \end{Highlighting}
+% * <jay.hesselberth@gmail.com> 2017-06-10T17:17:56.304Z:
+%
+% Is it possible to insert the figure inline in the document?
+% * KR
+% Yes, but they request that figures are listed at the end of the document.
+% Once the document is formatted by F1000 I think that the document will look similar to this article:
+% https://f1000research.com/articles/5-2122/v2
+% ^.
 
 
-\subsubsection{Reproducible reports}\label{reproducible-reports}
-
-\texttt{valr} can be used in RMarkdown documents to generate
-reproducible work-flows for data processing. Because \texttt{valr} is
-reasonably fast (see the \protect\hyperlink{benchmarks}{benchmarks}), we
-now use it in lieu of other tools for exploratory analysis of genomic
-data sets in R.
-
-Command-line tools like \texttt{BEDtools} and \texttt{bedops} can be
-used in reproducible workflows (e.g., with
-\href{https://bitbucket.org/snakemake/snakemake/wiki/Home}{\texttt{snakemake}}),
-but it is cumbersome to move from command-line tools to exploratory
-analysis and plotting software.
-\href{https://pythonhosted.org/pybedtools/}{\texttt{pybedtools}} can be
-used within \texttt{ipython\ notebooks} to accomplish a similar goal,
-but others have pointed out
-\href{https://www.r-bloggers.com/why-i-dont-like-jupyter-fka-ipython-notebook/}{issues
-with this approach}, including clunky version control. Because RMarkdown
-files are text files, they are readily kept under version control.
-Moreover, new features in RStudio, such as notebook viewing, and multiple language support enable similar functionality to \texttt{ipython}.
-
-\subsubsection{Grouping data}\label{grouping-data}
+\subsubsection*{Grouping data}\label{grouping-data}
 
 The \texttt{group\_by} function in dplyr can be used to perform functions
 on subsets of single and multiple \texttt{data\_frame}s. Functions in
@@ -267,7 +280,7 @@ Comparisons between intervals on opposite strands are done using the
 Both single set (e.g. \texttt{bed\_merge()}) and multi set operations
 will respect groupings in the input intervals.
 
-\subsubsection{Column specification}\label{column-specification}
+\subsubsection*{Column specification}\label{column-specification}
 
 Columns in \texttt{BEDtools} are referred to by position:
 
@@ -288,8 +301,8 @@ multiple name/value expressions for summaries.
 \end{Highlighting}
 
 
-\subsection{API}\label{api}
-The major functions available in valr are shown in Table \ref{tab:tools}. 
+\subsubsection*{API}\label{api}
+The major functions available in valr are shown in Table \ref{tab:tools}.
 
 
 \subsection*{Summarizing interval coverage across genomic features}
@@ -297,12 +310,12 @@ The major functions available in valr are shown in Table \ref{tab:tools}.
 This demonstration illustrates how to use \texttt{valr} tools to perform
 a ``meta-analysis'' of signals relative to genomic features. Here we to
 analyze the distribution of histone marks surrounding transcription
-start sites.
+start sites, using H3K4Me3 Chip-Seq data downloaded from ENCODE (Link to data here?).
 
 First we load libraries and relevant data.
 
 \begin{Highlighting}[]
-\CommentTok{# `valr_example()` identifies the path of example files}
+\CommentTok{# `valr_example()` identifies the path of example files in the valr package}
 \NormalTok{bedfile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'genes.hg19.chr22.bed.gz'}\NormalTok{)}
 \NormalTok{genomefile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.chrom.sizes.gz'}\NormalTok{)}
 \NormalTok{bgfile  <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hela.h3k4.chip.bg.gz'}\NormalTok{)}
@@ -351,7 +364,7 @@ easily accomodated by filtering them and using
 \end{Highlighting}
 
 Now we use the \texttt{.win\_id} group with \texttt{bed\_map()} to
-caluclate a sum by mapping \texttt{y} signals onto the intervals in
+calculate a sum by mapping \texttt{y} signals onto the intervals in
 \texttt{x}. These data are regrouped by \texttt{.win\_id} and a summary
 with \texttt{mean} and \texttt{sd} values is calculated.
 
@@ -405,77 +418,100 @@ combining \texttt{bed\_shuffle()}, \texttt{bed\_random()} and the
 \texttt{sample\_} functions from \texttt{dplyr} with interval statistics
 in \texttt{valr}.
 
-Here we examine the overlap of repeat classes in the human genome (on
-\texttt{chr22} only, for simplicity) using \texttt{bed\_jaccard()}.
+Here we examine the extent of overlap of repeat classes with exons in
+the human genome (on \texttt{chr22} only, for simplicity) using the
+jaccard similarity index. \texttt{bed\_jaccard()} implements the jaccard
+test to examine the similarity between two sets of genomic intervals.
+Using \texttt{bed\_shuffle()} and \texttt{replicate()} we generate a
+\texttt{data\_frame} containing 100 sets of randomly placed intervals
+then calculate the jaccard index for each set to generate a
+null-distribution of jaccard scores. Finally an empirical p-value is
+then calculated from the null-distribution.
 
 \begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(purrr)}
-\KeywordTok{library}\NormalTok{(tidyr)}
+\KeywordTok{library}\NormalTok{(tidyverse, }\DataTypeTok{warn.conflicts =} \NormalTok{F)}
 
 \NormalTok{repeats <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.rmsk.chr22.bed.gz'}\NormalTok{), }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{) }
 \NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.chrom.sizes.gz'}\NormalTok{))}
+\NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed12}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.refGene.chr22.bed.gz'}\NormalTok{))}
+\CommentTok{# convert bed12 to bed with exons}
+\NormalTok{exons <-}\StringTok{ }\KeywordTok{bed12_to_exons}\NormalTok{(genes)}
 
-
+\CommentTok{# function to repeat interval shuffling}
 \NormalTok{shuffle_intervals <-}\StringTok{ }\NormalTok{function(n, .data, genome) \{}
-  \KeywordTok{replicate}\NormalTok{(n, }\KeywordTok{bed_shuffle}\NormalTok{(.data, genome, }\DataTypeTok{seed =} \DecValTok{1010486}\NormalTok{), }\DataTypeTok{simplify =} \OtherTok{FALSE}\NormalTok{) %>%}
+  \KeywordTok{replicate}\NormalTok{(n, }\KeywordTok{bed_shuffle}\NormalTok{(.data, genome), }\DataTypeTok{simplify =} \OtherTok{FALSE}\NormalTok{) %>%}
 \StringTok{    }\KeywordTok{bind_rows}\NormalTok{(}\DataTypeTok{.id =} \StringTok{'rep'}\NormalTok{) %>%}
 \StringTok{    }\KeywordTok{group_by}\NormalTok{(rep) %>%}\StringTok{ }\KeywordTok{nest}\NormalTok{()}
 \NormalTok{\}}
-
-\NormalTok{shuffled <-}\StringTok{ }\KeywordTok{shuffle_intervals}\NormalTok{(}\DataTypeTok{n =} \DecValTok{100}\NormalTok{, repeats, genome) %>%}
+\NormalTok{nreps <-}\StringTok{ }\DecValTok{100}
+\NormalTok{shuffled <-}\StringTok{ }\KeywordTok{shuffle_intervals}\NormalTok{(}\DataTypeTok{n =} \NormalTok{nreps, repeats, genome) %>%}
 \StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{jaccard =} \NormalTok{data %>%}
 \StringTok{           }\KeywordTok{map}\NormalTok{(bed_jaccard, repeats) %>%}
 \StringTok{           }\KeywordTok{map_dbl}\NormalTok{(}\StringTok{"jaccard"}\NormalTok{))}
-  
 \NormalTok{shuffled}
 \CommentTok{#> # A tibble: 100 x 3}
 \CommentTok{#>      rep                  data      jaccard}
 \CommentTok{#>    <chr>                <list>        <dbl>}
-\CommentTok{#>  1     1 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  2     2 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  3     3 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  4     4 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  5     5 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  6     6 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  7     7 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  8     8 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#>  9     9 <tibble [10,000 x 6]> 0.0004355887}
-\CommentTok{#> 10    10 <tibble [10,000 x 6]> 0.0004355887}
+\CommentTok{#>  1     1 <tibble [10,000 x 6]> 0.0004337515}
+\CommentTok{#>  2     2 <tibble [10,000 x 6]> 0.0003501136}
+\CommentTok{#>  3     3 <tibble [10,000 x 6]> 0.0006080318}
+\CommentTok{#>  4     4 <tibble [10,000 x 6]> 0.0005768465}
+\CommentTok{#>  5     5 <tibble [10,000 x 6]> 0.0002537739}
+\CommentTok{#>  6     6 <tibble [10,000 x 6]> 0.0004480599}
+\CommentTok{#>  7     7 <tibble [10,000 x 6]> 0.0001777942}
+\CommentTok{#>  8     8 <tibble [10,000 x 6]> 0.0003448734}
+\CommentTok{#>  9     9 <tibble [10,000 x 6]> 0.0003303327}
+\CommentTok{#> 10    10 <tibble [10,000 x 6]> 0.0003312376}
 \CommentTok{#> # ... with 90 more rows}
+
+\NormalTok{obs <-}\StringTok{ }\KeywordTok{bed_jaccard}\NormalTok{(repeats, exons)}
+\NormalTok{obs}
+\CommentTok{#> # A tibble: 1 x 4}
+\CommentTok{#>    len_i   len_u    jaccard     n}
+\CommentTok{#>    <dbl>   <dbl>      <dbl> <dbl>}
+\CommentTok{#> 1 112123 4132109 0.02789139   805}
+
+\NormalTok{pvalue <-}\StringTok{ }\KeywordTok{sum}\NormalTok{(shuffled$jaccard >=}\StringTok{ }\NormalTok{obs$jaccard) +}\StringTok{ }\DecValTok{1} \NormalTok{/(nreps +}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{pvalue}
+\CommentTok{#> [1] 0.00990099}
 \end{Highlighting}
 
-\subsection*{Analysis of DNA methylation}
-
 \subsection*{Benchmarking against bedtools}
-In order to ensure that valr performs fast enough to enable interactive analysis, key functionality is implemented in C++. We benchmarked major valr functions against corresponding commands in BEDTools. valr operates on tables already preloaded into RAM, whereas BEDTools performs file-reading, processing, and writing. To compare valr against bedtools we generated two files containing 1 million random 1 Kbp intervals derived from the human genome. For valr functions, we timed reading the table into R (e.g. with read\_bed()) and performing the respective function. For BEDTools commands we timed executing the command with the output written to /dev/null. valr functions performed similarly or slightly faster than BEDTools commands with the exception of the bed\_map and bed\_fisher (Figure 3\ref{fig:Figure 3}) . 
+In order to ensure that valr performs fast enough to enable interactive analysis, key functionality is implemented in C++. To test the speed of major valr functions we generated two dataframes containing 1 million random 1 kilobase intervals derived from the human genome. Most of the major valr functions complete execution in less than 1 second, demonstrating that valr can process large interval datasets efficiently (Figure 3A\ref{fig:Figure 3}).
+
+We also benchmarked major valr functions against corresponding commands in BEDTools. valr operates on data\_frames already loaded into RAM, whereas BEDTools performs file-reading, processing, and writing. To compare valr against BEDTools we generated two BED files containing 1 million random 1 kilobase intervals derived from the human genome. For valr functions, we timed reading the table into R (e.g. with read\_bed()) and performing the respective function. For BEDTools commands we timed executing the command with the output written to /dev/null. valr functions performed similarly or faster than BEDTools commands with the exception of the \texttt{bed\_map} and \texttt{bed\_fisher} (Figure 3B\ref{fig:Figure 3}).
+
+\subsection{Reproducible Reports and Interactive Visualizations}
+Command-line tools like \texttt{BEDtools} and \texttt{bedops} can be incorporated into reproducible workflows (e.g., with
+\href{https://bitbucket.org/snakemake/snakemake/wiki/Home}{\texttt{snakemake}}\cite{koster_snakemakescalable_2012}),
+but it is cumbersome to transistion from command-line tools to exploratory analysis and plotting software. RMarkdown documents are plain text files, amenable to version control, which provide an interface to generate feature rich PDF and HTML reports that combine text, executable code, and figures in a single document. \texttt{valr} can be used in RMarkdown documents to provide rapid documentation of exploratory data analyses and generate reproducible work-flows for data processing.  Moreover, new features in RStudio, such as notebook viewing, and multiple language support enable similar functionality to another popular notebook platform \texttt{jupyter notebooks}.
+
+Additionally, \texttt{valr} seamlessly integrates into R shiny applications allowing for complex interactive visualizations relating to genomic interval analyses. We have developed a shiny application available on github \href{https://github.com/rnabioco/valrdata} that explores CHiP-Seq signal density surrounding transcription start sites and demonstrates the ease of implementing \texttt{valr} to power dynamic visualizations, (e.g ).
 
 \section*{Summary} % Optional - only if NO new datasets are included
-valr provides a flexible framework for interval arithmetic in R/Rstudio. valr functions are written with a simple and terse syntax that promotes flexible interactive analysis. Additionally by providing an easy-to-use interface for interval arithmetic in R, valr is also a useful teaching tool to introduce the analyses necessary to investigate correlations between genomic intervals, without requiring familiarity with the command-line.
-
-bedr provides a complementary set of tools for working with datasets where RAM limits loading all data into R. IRanges, is a mature package, but is a different philsophy. valr provides some of the functionality of Genometricorr, nbut is extensible to additional statistical test. 
+valr provides a flexible framework for interval arithmetic in R/Rstudio. valr functions are written with a simple and terse syntax that promotes flexible interactive analysis. Additionally by providing an easy-to-use interface for interval arithmetic in R, valr is also a useful teaching tool to introduce the analyses necessary to investigate correlations between genomic intervals, without requiring familiarity with the command-line. We envison that \texttt{valr} will help researchers quickly and reproducibly analyze genome interval datasets.
 
 \section*{Software availability}
 \begin{enumerate}
-\item URL valr can be installed via CRAN using "install.packages('valr')". 
+\item URL valr can be installed via CRAN using "install.packages('valr')".
 \item valr is maintained at http://github.com/rnabioco/valr
 \item valr source code is available at http://github.com/rnabioco/valr
 \item Latest stable version of source code is at: https://github.com/rnabioco/valr/archive/v0.2.0.tar.gz TO UPDATE
-\item Software license: MIT 
+\item Software license: MIT
 \end{enumerate}
 
 \section*{Author contributions}
-In order to give appropriate credit to each author of an article, the individual
-contributions of each author to the manuscript should be detailed in this section. We
-recommend using author initials and then stating briefly how they contributed.
+
+JR conceptualized the package and provided direction for software development. JR, KR, AG, and RS developed and tested the package.  YY and CB contributed workflows and benchmarks for the package. All authors wrote the manuscript.
 
 \section*{Competing interests}
 No competing interests were disclosed
 
 \section*{Grant information}
-This work was supported by the RNA Bioscience Initiative (funded by a Transformational Research Award from the University of Colorado School of Medicine) and a grant from the National Institutes of Health (XXX to J.H.)
+This work was supported by the RNA Bioscience Initiative (funded by a Transformational Research Award from the University of Colorado School of Medicine),  a grant from the National Institutes of Health (R35 GM119550 to J.H.), the Colorado Office of Economic Development and International Trade (CTGGI 2016-2096), the BioFrontiers Computing Core at the BioFrontiers Institute, University of Colorado at Boulder and the Intramural Research Program of the National Library of Medicine.
 
 \section*{Acknowledgments}
-This work was in part completed during an NIH sponsored Hackathon hosted by the Biofrontiers Department at the University of Colorado at Boulder. 
+This work was in part completed during an NIH sponsored Hackathon hosted by the Biofrontiers Department at the University of Colorado at Boulder.
 
 {\small\bibliographystyle{unsrtnat}
 \bibliography{valr}}
@@ -487,7 +523,7 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=1\textwidth]{figure1.pdf}
-\caption{\label{fig:Figure 1}Visualizing interval operations in valr with \texttt{bed\_glyph()}.} 
+\caption{\label{fig:Figure 1}Visualizing interval operations in valr with \texttt{bed\_glyph()}.}
 \end{figure}
 
 %%%% Figure 2 %%%%
@@ -495,14 +531,19 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 \begin{figure}[!htb]
 \centering
 \includegraphics[width=0.5\textwidth]{figure2.pdf}
-\caption{\label{fig:Figure 2}Meta-analysis of signals relative to genomic features with valr. \textnormal{Summarized coverage of human H3K4Me3 Chip-Seq coverage across positive strand transcription start sites. Data presented +/- SEM.}}
+\caption{\label{fig:Figure 2}Meta-analysis of signals relative to genomic features with valr. \textnormal{(A) Summarized coverage of human H3K4Me3 Chip-Seq coverage across positive strand transcription start sites. Data presented +/- SEM.}}
 \end{figure}
 
 %%%% Figure 3 %%%%
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=0.5\textwidth]{figure3.pdf}
-\caption{\label{fig:Figure 3} Performance of major valr functionality benchmarked against BEDTools \textnormal{Timings calculated using microbenchmark and GNU time commands for valr and BEDTools respectively (A).}}
+\includegraphics[width=1\textwidth]{figure3.pdf}
+\caption{\label{fig:Figure 3} Performance of major valr functionality. \textnormal{(A)  Timings calculated by performing 10 repetitions of indicated functions on dataframes containing 1 million random 1 kilobase x/y intervals generated using \texttt{bed\_random()}. (B) Timings for executing functions in BEDTools or equivalent functions in valr using the same interval sets as in (A). All BEDTools functions were written to /dev/null, and were timed using GNU \texttt{time}. Timings for valr functions in (B) include times for reading files using \texttt{read\_bed()} and were timed using the \texttt{microbenchmark} package.}}
+% * <jay.hesselberth@gmail.com> 2017-06-07T13:17:50.374Z:
+%
+% No bar charts! Make this a boxplot ideally.
+%
+% ^.
 \end{figure}
 
 
@@ -513,22 +554,22 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 \caption{\label{tab:tools} An overview of major functions available in valr.}
 \centering
 \begin{tabular}{lr}
- \bfseries \large Function Name & \bfseries  \large Purpose \\ 
+ \bfseries \large Function Name & \bfseries  \large Purpose \\
   \hline
-\bfseries Reading Data & \\ 
-  read\_bed & Read BED files \\ 
+\bfseries Reading Data & \\
+  read\_bed & Read BED files \\
   read\_bedgraph & Read bedGraph files \\
   read\_narrowpeak & Read narrowPeak files \\
   read\_broadpeak & Read broadPeak files \\
-\bfseries Interval Transformation \\ 
+\bfseries Interval Transformation \\
   bed\_slop & Expand interval coordinates \\
   bed\_shift & Shift interval coordinates \\
   bed\_flank & Create flanking intervals \\
   bed\_merge & Merge overlapping intervals \\
   bed\_cluster & Identify (but not merge) overlapping intervals \\
   bed\_complement & Create intervals not covered by a query \\
-\bfseries Interval Comparison & \\ 
-  bed\_intersect & Report intersecting intervals from x and y tbls \\ 
+\bfseries Interval Comparison & \\
+  bed\_intersect & Report intersecting intervals from x and y tbls \\
   bed\_cluster & Cluster neighboring intervals \\
   bed\_map & Apply functions to selected columns for overlapping intervals \\
   bed\_subtract & Remove intervals based on overlaps \\
@@ -542,8 +583,8 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
   bed\_reldist & Quantify relative distances between sets of intervals \\
   bed\_absdist & Quantify absolute distances between sets of intervals \\
   bed\_jaccard &Quantify extent of overlap between two sets of intervals \\
-\bfseries Utilities &  \\ 
-  bed\_glyph & Visualize the actions of valr functions \\ 
+\bfseries Utilities &  \\
+  bed\_glyph & Visualize the actions of valr functions \\
   bound\_intervals & Constrain intervals to a genome reference \\
   bed\_makewindows & Subdivide intervals \\
   bed12\_to\_exons & Convert BED12 to BED6 format \\
@@ -552,97 +593,6 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
   \end{tabular}
 \end{table}
 
-
-
-%%%%%%%%%%%% Previous Figures %%%%%%%%%%%
-
-
-%%%% TSS H3K4me3 example %%%%
-\begin{figure}
-\centering
-    \begin{subfigure}[b]{0.45\textwidth}
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{x <-}\StringTok{ }\KeywordTok{trbl_interval}\NormalTok{(}
-  \NormalTok{~chrom, ~start, ~end,}
-  \StringTok{'chr1'}\NormalTok{, }\DecValTok{25}\NormalTok{,     }\DecValTok{50}\NormalTok{,}
-  \StringTok{'chr1'}\NormalTok{, }\DecValTok{100}\NormalTok{,    }\DecValTok{125}
-\NormalTok{)}
-
-\NormalTok{y <-}\StringTok{ }\KeywordTok{trbl_interval}\NormalTok{(}
-  \NormalTok{~chrom, ~start, ~end,}
-  \StringTok{'chr1'}\NormalTok{, }\DecValTok{30}\NormalTok{,     }\DecValTok{75}
-\NormalTok{)}
-
-\KeywordTok{bed_glyph}\NormalTok{(}\KeywordTok{bed_intersect}\NormalTok{(x, y))}
-\end{Highlighting}
-\end{Shaded}
-        \label{fig:bed_glyph_code}
-    \end{subfigure}
-    ~
-\begin{subfigure}[b]{0.45\textwidth}
-        \includegraphics[width=\textwidth]{intersect_glyph-1.pdf}
-        \label{fig:bed_glyph_out}
-    \end{subfigure}
-\caption{\label{fig:your-figure}Visualizing interval intersections with valr.	 }
-\end{figure}
-
-\begin{figure}
-\centering
-    \begin{subfigure}[b]{\textwidth}
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{# `valr_example()` identifies the path of example files}
-\NormalTok{bedfile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'genes.hg19.chr22.bed.gz'}\NormalTok{)}
-\NormalTok{genomefile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.chrom.sizes.gz'}\NormalTok{)}
-\NormalTok{bgfile  <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hela.h3k4.chip.bg.gz'}\NormalTok{)}
-
-\NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(bedfile, }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{)}
-\NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(genomefile)}
-\NormalTok{y <-}\StringTok{ }\KeywordTok{read_bedgraph}\NormalTok{(bgfile)}
-
-\CommentTok{# generate 1 bp TSS intervals, `+` strand only}
-\NormalTok{tss <-}\StringTok{ }\NormalTok{genes %>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(strand ==}\StringTok{ '+'}\NormalTok{) %>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{end =} \NormalTok{start +}\StringTok{ }\DecValTok{1}\NormalTok{)}
-
-\CommentTok{# 1000 bp up and downstream}
-\NormalTok{region_size <-}\StringTok{ }\DecValTok{1000}
-
-\CommentTok{# 50 bp windows}
-\NormalTok{win_size <-}\StringTok{ }\DecValTok{50}
-
-\CommentTok{# add slop to the TSS, break into windows and add a group}
-\NormalTok{x <-}\StringTok{ }\NormalTok{tss %>%}\StringTok{ }\KeywordTok{bed_slop}\NormalTok{(genome, }\DataTypeTok{both =} \NormalTok{region_size) %>%}
-\StringTok{  }\KeywordTok{bed_makewindows}\NormalTok{(genome, win_size)}
-
-\CommentTok{# map signals to TSS regions and calculate summary statistics.}
-\NormalTok{res <-}\StringTok{ }\KeywordTok{bed_map}\NormalTok{(x, y, }\DataTypeTok{win_sum =} \KeywordTok{sum}\NormalTok{(value, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)) %>%}
-\StringTok{  }\KeywordTok{group_by}\NormalTok{(.win_id) %>%}
-\StringTok{  }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{win_mean =} \KeywordTok{mean}\NormalTok{(win_sum, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{),}
-            \DataTypeTok{win_sd =} \KeywordTok{sd}\NormalTok{(win_sum, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{))}
-
-\NormalTok{x_labels <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(-region_size, region_size, }\DataTypeTok{by =} \NormalTok{win_size *}\StringTok{ }\DecValTok{5}\NormalTok{)}
-\NormalTok{x_breaks <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{41}\NormalTok{, }\DataTypeTok{by =} \DecValTok{5}\NormalTok{)}
-
-\NormalTok{sd_limits <-}\StringTok{ }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymax =} \NormalTok{win_mean +}\StringTok{ }\NormalTok{win_sd, }\DataTypeTok{ymin =} \NormalTok{win_mean -}\StringTok{ }\NormalTok{win_sd)}
-
-\KeywordTok{ggplot}\NormalTok{(res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{.win_id, }\DataTypeTok{y =} \NormalTok{win_mean)) +}\StringTok{ }\KeywordTok{geom_point}\NormalTok{() +}\StringTok{ }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Signal'}\NormalTok{) +}
-\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{labels =} \NormalTok{x_labels, }\DataTypeTok{breaks =} \NormalTok{x_breaks) +}\StringTok{ }
-\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Human H3K4me3 signal near transcription start sites'}\NormalTok{) +}
-\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'Position (bp from TSS)'}\NormalTok{) +}\StringTok{ }\KeywordTok{geom_pointrange}\NormalTok{(sd_limits) +}
-\StringTok{  }\KeywordTok{theme_classic}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-        \label{fig:meta_gene_code}
-    \end{subfigure}
-    
-\begin{subfigure}[b]{0.5\textwidth}
-        \includegraphics[width=\textwidth]{demo-tss-1.pdf}
-        \label{fig:meta_gene_out}
-    \end{subfigure}
-\caption{\label{fig:your-figure}Meta-analysis of signals relative to genomic features with valr.}
-\end{figure}
-
-
 % See this guide for more information on BibTeX:
 % http://libguides.mit.edu/content.php?pid=55482&sid=406343
 
@@ -650,7 +600,7 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 % https://f1000research.com/for-authors/article-guidelines/software-tool-articles
 
 
-% When all authors are happy with the paper, use the 
+% When all authors are happy with the paper, use the
 % ‘Submit to F1000RESEARCH' button from the menu above
 % to submit directly to the open life science journal F1000Research.
 
@@ -659,112 +609,5 @@ This work was in part completed during an NIH sponsored Hackathon hosted by the 
 
 % We hope you find the F1000Research Overleaf template useful,
 % please let us know if yo\begin{Shaded}
-
-%%%% DNA methylation example %%%%
-
-\subsection{Get the public datasets from
-UCSC}\label{get-the-public-datasets-from-ucsc}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(dplyr)}
-\KeywordTok{library}\NormalTok{(valr)}
-\KeywordTok{library}\NormalTok{(R.utils)}
-\KeywordTok{library}\NormalTok{(curl)}
-\KeywordTok{library}\NormalTok{(ggplot2)}
-\KeywordTok{library}\NormalTok{(gridExtra)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{DMSO_treated<-}\KeywordTok{read_bed}\NormalTok{(}\StringTok{'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibMethylRrbs/wgEncodeHaibMethylRrbsA549Dm002p7dHaibSitesRep1.bed.gz'}\NormalTok{, }\DataTypeTok{n_fields=}\DecValTok{6}\NormalTok{, }\DataTypeTok{skip=}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{untreated<-}\KeywordTok{read_bed}\NormalTok{(}\StringTok{'http://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeHaibMethylRrbs/wgEncodeHaibMethylRrbsAg04449UwSitesRep1.bed.gz'}\NormalTok{, }\DataTypeTok{n_fields=}\DecValTok{6}\NormalTok{, }\DataTypeTok{skip=}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-To view the data
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{head}\NormalTok{(untreated)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-#> # A tibble: 6 x 6
-#>   chrom start   end           name score strand
-#>   <chr> <int> <int>          <chr> <chr>  <chr>
-#> 1  chr1 10785 10786 AG04449_0__JS_     1      +
-#> 2  chr1 10788 10789 AG04449_0__JS_     1      +
-#> 3  chr1 10794 10795 AG04449_0__JS_     1      +
-#> 4  chr1 10810 10811 AG04449_0__JS_     1      +
-#> 5  chr1 10812 10813 AG04449_0__JS_     1      +
-#> 6  chr1 10815 10816 AG04449_0__JS_     1      +
-\end{verbatim}
-
-\subsection{Examine regions that are different and regions that
-intersect}\label{examine-regions-that-are-different-and-regions-that-intersect}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{different_region<-}\KeywordTok{bed_subtract}\NormalTok{(DMSO_treated,untreated, }\DataTypeTok{any=}\OtherTok{FALSE}\NormalTok{)}
-\KeywordTok{dim}\NormalTok{(different_region)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-#> [1] 278241      6
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{intersect_region<-}\KeywordTok{bed_intersect}\NormalTok{(DMSO_treated,untreated, }\DataTypeTok{suffix=}\KeywordTok{c}\NormalTok{(}\StringTok{'.treated'}\NormalTok{,}\StringTok{'.untreated'}\NormalTok{))}
-\KeywordTok{dim}\NormalTok{(intersect_region)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-#> [1] 1576400      12
-\end{verbatim}
-
-\subsection{Plot the distribution of different regions and intersected
-regions across
-chromosomes}\label{plot-the-distribution-of-different-regions-and-intersected-regions-across-chromosomes}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{p1<-}\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{different_region, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{chrom))+}\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{stat=}\StringTok{'count'}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\KeywordTok{factor}\NormalTok{(chrom), }\DataTypeTok{fill=}\StringTok{'differential methylation'}\NormalTok{))+}\KeywordTok{scale_fill_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{'Set2'}\NormalTok{)+}\KeywordTok{theme_minimal}\NormalTok{()+}\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Distribution of differential methylation across chromosomes'}\NormalTok{)+}\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-#> Warning: Ignoring unknown parameters: binwidth, bins, pad
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{p2<-}\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data=}\NormalTok{intersect_region, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{chrom))+}\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{stat=}\StringTok{'count'}\NormalTok{, }\KeywordTok{aes}\NormalTok{(}\KeywordTok{factor}\NormalTok{(chrom), }\DataTypeTok{fill=}\StringTok{'overlap methylation'}\NormalTok{))+}\KeywordTok{scale_fill_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{'Spectral'}\NormalTok{)+}\KeywordTok{theme_minimal}\NormalTok{()+}\KeywordTok{ggtitle}\NormalTok{(}\StringTok{'Distribution of overlapping methylation across chromosomes'}\NormalTok{)+}\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-#> Warning: Ignoring unknown parameters: binwidth, bins, pad
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{grid.arrange}\NormalTok{(p1, p2, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{, }\DataTypeTok{nrow =}\DecValTok{2}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-\begin{figure}
-\begin{center}\includegraphics{unnamed-chunk-8-1} \end{center}
-\end{figure}
-
 
 \end{document}
