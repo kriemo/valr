@@ -290,7 +290,7 @@ dat <- filter(dat, func != "makewindows")
 valr_data <- filter(dat, package == "valr")
 
 plot_a <- ggplot(res, aes(x=reorder(expr, time), y = time)) +
-  geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA, fill = RColorBrewer::brewer.pal(3, "Set1")[2]) +
+  geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA, fill = grDevices::grey.colors(2)[2]) +
   coord_flip() +
   theme_bw() +
   labs(
@@ -310,8 +310,10 @@ plot_a <- ggplot(res, aes(x=reorder(expr, time), y = time)) +
 
 plot_b <- ggplot(dat, aes(x=reorder(func, time), y = time, fill = package)) +
   geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA) +
-  scale_fill_brewer(palette = "Set1") + 
+  scale_fill_grey() + 
   coord_flip() +
+  geom_vline(xintercept = seq_along(unique(dat$func)) + 0.5,
+             color = "grey") +
   theme_bw() +
   labs(
     y='execution time (seconds)',
