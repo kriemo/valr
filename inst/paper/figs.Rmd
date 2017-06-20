@@ -58,10 +58,9 @@ ggsave("figure1.pdf", width = 11.2, height = 5.6)
 
 ## Figure 2
 ```{r fig2}
-# `valr_example()` identifies the path of example files
-bedfile <- valr_example('genes.hg19.chr22.bed.gz')
-genomefile <- valr_example('hg19.chrom.sizes.gz')
-bgfile  <- valr_example('hela.h3k4.chip.bg.gz')
+bedfile <- valr_example("genes.hg19.chr22.bed.gz")
+genomefile <- valr_example("hg19.chrom.sizes.gz")
+bgfile  <- valr_example("hela.h3k4.chip.bg.gz")
 
 genes <- read_bed(bedfile, n_fields = 6)
 genome <- read_genome(genomefile)
@@ -100,12 +99,13 @@ sd_limits <- aes(ymax = win_mean + win_sd, ymin = win_mean - win_sd)
 p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
   geom_point(size = 0.25) + geom_pointrange(sd_limits, size = 0.1) + 
   scale_x_continuous(labels = x_labels, breaks = x_breaks) + 
-  xlab('Position (bp from TSS)') + ylab('Signal') + 
+  xlab("Position (bp from TSS)") + ylab("Signal") + 
   theme_classic() +
-  pub_theme
+  pub_theme +
+  theme(axis.text.x = element_text(angle = 90))
 
-plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
-ggsave("figure2.pdf", width = 5.6, height = 4)
+plot_grid(p, align = "h", nrow = 1, labels="AUTO")
+ggsave("figure2.pdf", width = 5.6, height = 5.6)
 ```
 
 ## Figure 3
@@ -120,7 +120,7 @@ library(stringr)
 library(cowplot)
 
 # Set-up test genome
-genome <- read_genome(valr_example('hg19.chrom.sizes.gz'))
+genome <- read_genome(valr_example("hg19.chrom.sizes.gz"))
 write_tsv(genome, "genome.txt", col_names=FALSE)
 
 # number of intervals
@@ -336,6 +336,7 @@ ggsave("figure3.pdf", width = 20, height = 10)
 
 ## Code demonstrations
 
+### file I/O
 ```{r}
 library(valr)
 # function to retrieve path to example data
@@ -346,11 +347,147 @@ read_bed(bed_filepath)
 read_bed("https://github.com/rnabioco/valr/raw/master/inst/extdata/3fields.bed.gz")
 ```
 
-Using mysql
-```{r, warnings = F}
-library(dplyr, warn.conflicts = F)
-hg19 <- db_ucsc("hg19")
-tbl(hg19, "refGene")
+### syntax demo
+
+```{r syntax_demo, message = FALSE}
+library(valr)
+library(dplyr)
+
+snps <- read_bed(valr_example("hg19.snps147.chr22.bed.gz"), n_fields = 6)
+genes <- read_bed(valr_example("genes.hg19.chr22.bed.gz"), n_fields = 6)
+
+# find snps in intergenic regions
+intergenic <- bed_subtract(snps, genes)
+# distance from intergenic snps to nearest gene
+nearby <- bed_closest(intergenic, genes)
+
+nearby %>%
+  select(starts_with("name"), .overlap, .dist) %>%
+  filter(abs(.dist) < 1000)
+```
+
+### Figure 1 code demo
+
+```{r}
+x <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 25,     50,
+  "chr1", 100,    125
+)
+
+y <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 30,     75
+)
+
+bed_glyph(bed_intersect(x, y))
+```
+
+```{r}
+x <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  "chr1",      1,      50,
+  "chr1",      10,     75,
+  "chr1",      100,    120
+)
+
+bed_glyph(bed_merge(x))
+```
+
+### grouping data demo
+
+```{r}
+x <- tibble::tribble(
+  ~chrom, ~start, ~end, ~strand,
+  "chr1", 1,      100,  "+",
+  "chr1", 50,     150,  "+",
+  "chr2", 100,    200,  "-"
+)
+
+y <- tibble::tribble(
+  ~chrom, ~start, ~end, ~strand,
+  "chr1", 50,     125,  "+",
+  "chr1", 50,     150,  "-",
+  "chr2", 50,     150,  "+"
+)
+
+# intersect tbls by strand
+x <- group_by(x, strand)
+y <- group_by(y, strand)
+
+bed_intersect(x, y)
+```
+
+Comparisons between intervals on opposite strands are done using the `flip_strands()` function:
+
+```{r}
+x <- group_by(x, strand)
+
+y <- flip_strands(y)
+y <- group_by(y, strand)
+
+bed_intersect(x, y)
+```
+
+### Figure 2 code demo
+```{r }
+bedfile <- valr_example("genes.hg19.chr22.bed.gz")
+genomefile <- valr_example("hg19.chrom.sizes.gz")
+bgfile  <- valr_example("hela.h3k4.chip.bg.gz")
+
+genes <- read_bed(bedfile, n_fields = 6)
+genome <- read_genome(genomefile)
+y <- read_bedgraph(bgfile)
+```
+
+Then we generate 1 bp intervals to represent transcription start sites (TSSs). We focus on `+` strand genes, but `-` genes are easily accomodated by filtering them and using `bed_makewindows()` with `reversed` window numbers.
+
+```{r}
+# generate 1 bp TSS intervals, "+" strand only
+tss <- genes %>%
+  filter(strand == "+") %>%
+  mutate(end = start + 1)
+
+# 1000 bp up and downstream
+region_size <- 1000
+# 50 bp windows
+win_size <- 50
+
+# add slop to the TSS, break into windows and add a group
+x <- tss %>%
+  bed_slop(genome, both = region_size) %>%
+  bed_makewindows(genome, win_size)
+
+x
+```
+
+Now we use the `.win_id` group with `bed_map()` to caluclate a sum by mapping `y` signals onto the intervals in `x`. These data are regrouped by `.win_id` and a summary with `mean` and `sd` values is calculated.
+
+```{r}
+# map signals to TSS regions and calculate summary statistics.
+res <- bed_map(x, y, win_sum = sum(value, na.rm = TRUE)) %>%
+  group_by(.win_id) %>%
+  summarize(win_mean = mean(win_sum, na.rm = TRUE),
+            win_sd = sd(win_sum, na.rm = TRUE))
+
+res
+```
+
+Finally, these summary statistics are used to construct a plot that illustrates histone density surrounding TSSs.
+
+```{r}
+library(ggplot2)
+
+x_labels <- seq(-region_size, region_size, by = win_size * 5)
+x_breaks <- seq(1, 41, by = 5)
+
+sd_limits <- aes(ymax = win_mean + win_sd, ymin = win_mean - win_sd)
+
+p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
+  geom_point(size = 0.25) + geom_pointrange(sd_limits, size = 0.1) + 
+  scale_x_continuous(labels = x_labels, breaks = x_breaks) + 
+  xlab("Position (bp from TSS)") + ylab("Signal") + 
+  theme_classic()
 ```
 
 
@@ -363,16 +500,16 @@ Here we examine the extent of overlap of repeat classes with exons in the human 
 ```{r reldist_shuffle, message = FALSE, warning = FALSE}
 library(tidyverse, warn.conflicts = F)
 
-repeats <- read_bed(valr_example('hg19.rmsk.chr22.bed.gz'), n_fields = 6) 
-genome <- read_genome(valr_example('hg19.chrom.sizes.gz'))
-genes <- read_bed12(valr_example('hg19.refGene.chr22.bed.gz'))
+repeats <- read_bed(valr_example("hg19.rmsk.chr22.bed.gz"), n_fields = 6) 
+genome <- read_genome(valr_example("hg19.chrom.sizes.gz"))
+genes <- read_bed12(valr_example("hg19.refGene.chr22.bed.gz"))
 # convert bed12 to bed with exons
 exons <- bed12_to_exons(genes)
 
 # function to repeat interval shuffling
 shuffle_intervals <- function(n, .data, genome) {
   replicate(n, bed_shuffle(.data, genome), simplify = FALSE) %>%
-    bind_rows(.id = 'rep') %>%
+    bind_rows(.id = "rep") %>%
     group_by(rep) %>% nest()
 }
 nreps <- 100
@@ -388,6 +525,8 @@ obs
 pvalue <- sum(shuffled$jaccard >= obs$jaccard) + 1 /(nreps + 1)
 pvalue
 ```
+
+
 
 
 ## Correlations among DNase I hypersensitive sites 

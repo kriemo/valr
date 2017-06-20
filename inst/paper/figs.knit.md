@@ -10,7 +10,21 @@ date: "June 6, 2017"
 ```r
 library(valr)
 library(tidyverse)
+#> Loading tidyverse: ggplot2
+#> Loading tidyverse: tibble
+#> Loading tidyverse: tidyr
+#> Loading tidyverse: readr
+#> Loading tidyverse: purrr
+#> Loading tidyverse: dplyr
+#> Conflicts with tidy packages ----------------------------------------------
+#> filter(): dplyr, stats
+#> lag():    dplyr, stats
 library(cowplot)
+#> 
+#> Attaching package: 'cowplot'
+#> The following object is masked from 'package:ggplot2':
+#> 
+#>     ggsave
 ```
 
 
@@ -61,10 +75,9 @@ ggsave("figure1.pdf", width = 11.2, height = 5.6)
 ## Figure 2
 
 ```r
-# `valr_example()` identifies the path of example files
-bedfile <- valr_example('genes.hg19.chr22.bed.gz')
-genomefile <- valr_example('hg19.chrom.sizes.gz')
-bgfile  <- valr_example('hela.h3k4.chip.bg.gz')
+bedfile <- valr_example("genes.hg19.chr22.bed.gz")
+genomefile <- valr_example("hg19.chrom.sizes.gz")
+bgfile  <- valr_example("hela.h3k4.chip.bg.gz")
 
 genes <- read_bed(bedfile, n_fields = 6)
 genome <- read_genome(genomefile)
@@ -131,17 +144,18 @@ sd_limits <- aes(ymax = win_mean + win_sd, ymin = win_mean - win_sd)
 p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
   geom_point(size = 0.25) + geom_pointrange(sd_limits, size = 0.1) + 
   scale_x_continuous(labels = x_labels, breaks = x_breaks) + 
-  xlab('Position (bp from TSS)') + ylab('Signal') + 
+  xlab("Position (bp from TSS)") + ylab("Signal") + 
   theme_classic() +
-  pub_theme
+  pub_theme +
+  theme(axis.text.x = element_text(angle = 90))
 
-plot_grid(p, align = 'h', nrow = 1, labels="AUTO")
+plot_grid(p, align = "h", nrow = 1, labels="AUTO")
 ```
 
 <img src="figs_files/figure-html/fig2-1.png" width="672" />
 
 ```r
-ggsave("figure2.pdf", width = 5.6, height = 4)
+ggsave("figure2.pdf", width = 5.6, height = 5.6)
 ```
 
 ## Figure 3
@@ -157,7 +171,7 @@ library(stringr)
 library(cowplot)
 
 # Set-up test genome
-genome <- read_genome(valr_example('hg19.chrom.sizes.gz'))
+genome <- read_genome(valr_example("hg19.chrom.sizes.gz"))
 write_tsv(genome, "genome.txt", col_names=FALSE)
 
 # number of intervals
@@ -335,7 +349,7 @@ dat <- filter(dat, func != "makewindows")
 valr_data <- filter(dat, package == "valr")
 
 plot_a <- ggplot(res, aes(x=reorder(expr, time), y = time)) +
-  geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA, fill = RColorBrewer::brewer.pal(3, "Set1")[2]) +
+  geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA, fill = grDevices::grey.colors(2)[2]) +
   coord_flip() +
   theme_bw() +
   labs(
@@ -355,8 +369,10 @@ plot_a <- ggplot(res, aes(x=reorder(expr, time), y = time)) +
 
 plot_b <- ggplot(dat, aes(x=reorder(func, time), y = time, fill = package)) +
   geom_boxplot(width = 0.75, size = 0.33, outlier.shape = NA) +
-  scale_fill_brewer(palette = "Set1") + 
+  scale_fill_grey() + 
   coord_flip() +
+  geom_vline(xintercept = seq_along(unique(dat$func)) + 0.5,
+             color = "grey") +
   theme_bw() +
   labs(
     y='execution time (seconds)',
@@ -385,6 +401,7 @@ ggsave("figure3.pdf", width = 20, height = 10)
 
 ## Code demonstrations
 
+### file I/O
 
 ```r
 library(valr)
@@ -422,53 +439,213 @@ read_bed("https://github.com/rnabioco/valr/raw/master/inst/extdata/3fields.bed.g
 #> 10  chr1 327545 328439
 ```
 
-Using mysql
+### syntax demo
+
 
 ```r
-library(dplyr, warn.conflicts = F)
-hg19 <- db_ucsc("hg19")
-tbl(hg19, "refGene")
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 0 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 4 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 5 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 6 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 7 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 8 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 0 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 4 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 5 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 6 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 7 imported
-#> as numeric
-#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 8 imported
-#> as numeric
-#> # Source:   table<refGene> [?? x 16]
-#> # Database: mysql 5.6.26-log [genomep@genome-mysql.cse.ucsc.edu:/hg19]
-#>      bin         name chrom strand   txStart     txEnd  cdsStart    cdsEnd
-#>    <dbl>        <chr> <chr>  <chr>     <dbl>     <dbl>     <dbl>     <dbl>
-#>  1   585    NR_024540  chr1      -     14361     29370     29370     29370
-#>  2  1759    NR_110022  chrX      + 153991016 154005964 154005964 154005964
-#>  3   604    NR_033380  chrX      +   2527305   2575270   2575270   2575270
-#>  4    75    NR_033381  chrY      +   2477305   2506370   2506370   2506370
-#>  5   915    NM_182508 chr13      +  43355685  43365685  43358203  43362926
-#>  6   923    NM_181845 chr19      +  44331472  44353050  44337656  44352793
-#>  7   586    NR_039983  chr1      -    134772    140566    140566    140566
-#>  8  1964    NR_028327  chr5      + 180750506 180755196 180755196 180755196
-#>  9   126 NM_001271875 chr17      -  55938603  56032684  55943837  55962925
-#> 10  2278    NR_125989  chr1      - 222001007 222014008 222014008 222014008
-#> # ... with more rows, and 8 more variables: exonCount <dbl>,
-#> #   exonStarts <chr>, exonEnds <chr>, score <int>, name2 <chr>,
-#> #   cdsStartStat <chr>, cdsEndStat <chr>, exonFrames <chr>
+library(valr)
+library(dplyr)
+
+snps <- read_bed(valr_example("hg19.snps147.chr22.bed.gz"), n_fields = 6)
+genes <- read_bed(valr_example("genes.hg19.chr22.bed.gz"), n_fields = 6)
+
+# find snps in intergenic regions
+intergenic <- bed_subtract(snps, genes)
+# distance from intergenic snps to nearest gene
+nearby <- bed_closest(intergenic, genes)
+
+nearby %>%
+  select(starts_with("name"), .overlap, .dist) %>%
+  filter(abs(.dist) < 1000)
+#> # A tibble: 285 x 4
+#>         name.x            name.y .overlap .dist
+#>          <chr>             <chr>    <int> <int>
+#>  1   rs2261631             P704P        0  -267
+#>  2 rs570770556             POTEH        0  -912
+#>  3 rs538163832             POTEH        0  -952
+#>  4   rs9606135            TPTEP1        0  -421
+#>  5  rs11912392 ANKRD62P1-PARP4P3        0   104
+#>  6   rs8136454          BC038197        0   355
+#>  7   rs5992556              XKR3        0  -455
+#>  8 rs114101676              GAB4        0   473
+#>  9  rs62236167             CECR7        0   261
+#> 10   rs5747023             CECR1        0  -386
+#> # ... with 275 more rows
+```
+
+### Figure 1 code demo
+
+
+```r
+x <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 25,     50,
+  "chr1", 100,    125
+)
+
+y <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  "chr1", 30,     75
+)
+
+bed_glyph(bed_intersect(x, y))
+```
+
+<img src="figs_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+
+
+```r
+x <- tibble::tribble(
+  ~chrom, ~start, ~end,
+  "chr1",      1,      50,
+  "chr1",      10,     75,
+  "chr1",      100,    120
+)
+
+bed_glyph(bed_merge(x))
+```
+
+<img src="figs_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+
+### grouping data demo
+
+
+```r
+x <- tibble::tribble(
+  ~chrom, ~start, ~end, ~strand,
+  "chr1", 1,      100,  "+",
+  "chr1", 50,     150,  "+",
+  "chr2", 100,    200,  "-"
+)
+
+y <- tibble::tribble(
+  ~chrom, ~start, ~end, ~strand,
+  "chr1", 50,     125,  "+",
+  "chr1", 50,     150,  "-",
+  "chr2", 50,     150,  "+"
+)
+
+# intersect tbls by strand
+x <- group_by(x, strand)
+y <- group_by(y, strand)
+
+bed_intersect(x, y)
+#> # A tibble: 2 x 8
+#>   chrom start.x end.x strand.x start.y end.y strand.y .overlap
+#>   <chr>   <dbl> <dbl>    <chr>   <dbl> <dbl>    <chr>    <int>
+#> 1  chr1       1   100        +      50   125        +       50
+#> 2  chr1      50   150        +      50   125        +       75
+```
+
+Comparisons between intervals on opposite strands are done using the `flip_strands()` function:
+
+
+```r
+x <- group_by(x, strand)
+
+y <- flip_strands(y)
+y <- group_by(y, strand)
+
+bed_intersect(x, y)
+#> # A tibble: 3 x 8
+#>   chrom start.x end.x strand.x start.y end.y strand.y .overlap
+#>   <chr>   <dbl> <dbl>    <chr>   <dbl> <dbl>    <chr>    <int>
+#> 1  chr2     100   200        -      50   150        -       50
+#> 2  chr1       1   100        +      50   150        +       50
+#> 3  chr1      50   150        +      50   150        +      100
+```
+
+### Figure 2 code demo
+
+```r
+bedfile <- valr_example("genes.hg19.chr22.bed.gz")
+genomefile <- valr_example("hg19.chrom.sizes.gz")
+bgfile  <- valr_example("hela.h3k4.chip.bg.gz")
+
+genes <- read_bed(bedfile, n_fields = 6)
+genome <- read_genome(genomefile)
+y <- read_bedgraph(bgfile)
+```
+
+Then we generate 1 bp intervals to represent transcription start sites (TSSs). We focus on `+` strand genes, but `-` genes are easily accomodated by filtering them and using `bed_makewindows()` with `reversed` window numbers.
+
+
+```r
+# generate 1 bp TSS intervals, "+" strand only
+tss <- genes %>%
+  filter(strand == "+") %>%
+  mutate(end = start + 1)
+
+# 1000 bp up and downstream
+region_size <- 1000
+# 50 bp windows
+win_size <- 50
+
+# add slop to the TSS, break into windows and add a group
+x <- tss %>%
+  bed_slop(genome, both = region_size) %>%
+  bed_makewindows(genome, win_size)
+
+x
+#> # A tibble: 13,530 x 7
+#>    chrom    start      end      name score strand .win_id
+#>    <chr>    <int>    <int>     <chr> <chr>  <chr>   <int>
+#>  1 chr22 16161065 16161115 LINC00516     3      +       1
+#>  2 chr22 16161115 16161165 LINC00516     3      +       2
+#>  3 chr22 16161165 16161215 LINC00516     3      +       3
+#>  4 chr22 16161215 16161265 LINC00516     3      +       4
+#>  5 chr22 16161265 16161315 LINC00516     3      +       5
+#>  6 chr22 16161315 16161365 LINC00516     3      +       6
+#>  7 chr22 16161365 16161415 LINC00516     3      +       7
+#>  8 chr22 16161415 16161465 LINC00516     3      +       8
+#>  9 chr22 16161465 16161515 LINC00516     3      +       9
+#> 10 chr22 16161515 16161565 LINC00516     3      +      10
+#> # ... with 13,520 more rows
+```
+
+Now we use the `.win_id` group with `bed_map()` to caluclate a sum by mapping `y` signals onto the intervals in `x`. These data are regrouped by `.win_id` and a summary with `mean` and `sd` values is calculated.
+
+
+```r
+# map signals to TSS regions and calculate summary statistics.
+res <- bed_map(x, y, win_sum = sum(value, na.rm = TRUE)) %>%
+  group_by(.win_id) %>%
+  summarize(win_mean = mean(win_sum, na.rm = TRUE),
+            win_sd = sd(win_sum, na.rm = TRUE))
+
+res
+#> # A tibble: 41 x 3
+#>    .win_id win_mean    win_sd
+#>      <int>    <dbl>     <dbl>
+#>  1       1 100.8974  85.83423
+#>  2       2 110.6829  81.13521
+#>  3       3 122.9070  99.09635
+#>  4       4 116.2800  96.30098
+#>  5       5 116.3500 102.33773
+#>  6       6 124.9048  95.08887
+#>  7       7 122.9437  94.39792
+#>  8       8 127.5946  91.47407
+#>  9       9 130.2051  95.71309
+#> 10      10 130.1220  88.82809
+#> # ... with 31 more rows
+```
+
+Finally, these summary statistics are used to construct a plot that illustrates histone density surrounding TSSs.
+
+
+```r
+library(ggplot2)
+
+x_labels <- seq(-region_size, region_size, by = win_size * 5)
+x_breaks <- seq(1, 41, by = 5)
+
+sd_limits <- aes(ymax = win_mean + win_sd, ymin = win_mean - win_sd)
+
+p <- ggplot(res, aes(x = .win_id, y = win_mean)) +
+  geom_point(size = 0.25) + geom_pointrange(sd_limits, size = 0.1) + 
+  scale_x_continuous(labels = x_labels, breaks = x_breaks) + 
+  xlab("Position (bp from TSS)") + ylab("Signal") + 
+  theme_classic()
 ```
 
 
@@ -482,16 +659,16 @@ Here we examine the extent of overlap of repeat classes with exons in the human 
 ```r
 library(tidyverse, warn.conflicts = F)
 
-repeats <- read_bed(valr_example('hg19.rmsk.chr22.bed.gz'), n_fields = 6) 
-genome <- read_genome(valr_example('hg19.chrom.sizes.gz'))
-genes <- read_bed12(valr_example('hg19.refGene.chr22.bed.gz'))
+repeats <- read_bed(valr_example("hg19.rmsk.chr22.bed.gz"), n_fields = 6) 
+genome <- read_genome(valr_example("hg19.chrom.sizes.gz"))
+genes <- read_bed12(valr_example("hg19.refGene.chr22.bed.gz"))
 # convert bed12 to bed with exons
 exons <- bed12_to_exons(genes)
 
 # function to repeat interval shuffling
 shuffle_intervals <- function(n, .data, genome) {
   replicate(n, bed_shuffle(.data, genome), simplify = FALSE) %>%
-    bind_rows(.id = 'rep') %>%
+    bind_rows(.id = "rep") %>%
     group_by(rep) %>% nest()
 }
 nreps <- 100
@@ -503,16 +680,16 @@ shuffled
 #> # A tibble: 100 x 3
 #>      rep                  data      jaccard
 #>    <chr>                <list>        <dbl>
-#>  1     1 <tibble [10,000 x 6]> 0.0004337515
-#>  2     2 <tibble [10,000 x 6]> 0.0003501136
-#>  3     3 <tibble [10,000 x 6]> 0.0006080318
-#>  4     4 <tibble [10,000 x 6]> 0.0005768465
-#>  5     5 <tibble [10,000 x 6]> 0.0002537739
-#>  6     6 <tibble [10,000 x 6]> 0.0004480599
-#>  7     7 <tibble [10,000 x 6]> 0.0001777942
-#>  8     8 <tibble [10,000 x 6]> 0.0003448734
-#>  9     9 <tibble [10,000 x 6]> 0.0003303327
-#> 10    10 <tibble [10,000 x 6]> 0.0003312376
+#>  1     1 <tibble [10,000 x 6]> 0.0003388967
+#>  2     2 <tibble [10,000 x 6]> 0.0004965988
+#>  3     3 <tibble [10,000 x 6]> 0.0002974843
+#>  4     4 <tibble [10,000 x 6]> 0.0006899870
+#>  5     5 <tibble [10,000 x 6]> 0.0004678412
+#>  6     6 <tibble [10,000 x 6]> 0.0001726937
+#>  7     7 <tibble [10,000 x 6]> 0.0004694941
+#>  8     8 <tibble [10,000 x 6]> 0.0004660410
+#>  9     9 <tibble [10,000 x 6]> 0.0006846643
+#> 10    10 <tibble [10,000 x 6]> 0.0002143829
 #> # ... with 90 more rows
 
 obs <- bed_jaccard(repeats, exons)
@@ -526,6 +703,8 @@ pvalue <- sum(shuffled$jaccard >= obs$jaccard) + 1 /(nreps + 1)
 pvalue
 #> [1] 0.00990099
 ```
+
+
 
 
 ## Correlations among DNase I hypersensitive sites 

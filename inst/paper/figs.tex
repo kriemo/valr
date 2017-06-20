@@ -2,7 +2,21 @@
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(valr)}
 \KeywordTok{library}\NormalTok{(tidyverse)}
+\CommentTok{#> Loading tidyverse: ggplot2}
+\CommentTok{#> Loading tidyverse: tibble}
+\CommentTok{#> Loading tidyverse: tidyr}
+\CommentTok{#> Loading tidyverse: readr}
+\CommentTok{#> Loading tidyverse: purrr}
+\CommentTok{#> Loading tidyverse: dplyr}
+\CommentTok{#> Conflicts with tidy packages ----------------------------------------------}
+\CommentTok{#> filter(): dplyr, stats}
+\CommentTok{#> lag():    dplyr, stats}
 \KeywordTok{library}\NormalTok{(cowplot)}
+\CommentTok{#> }
+\CommentTok{#> Attaching package: 'cowplot'}
+\CommentTok{#> The following object is masked from 'package:ggplot2':}
+\CommentTok{#> }
+\CommentTok{#>     ggsave}
 \end{Highlighting}
 \end{Shaded}
 
@@ -55,10 +69,9 @@
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# `valr_example()` identifies the path of example files}
-\NormalTok{bedfile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'genes.hg19.chr22.bed.gz'}\NormalTok{)}
-\NormalTok{genomefile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.chrom.sizes.gz'}\NormalTok{)}
-\NormalTok{bgfile  <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hela.h3k4.chip.bg.gz'}\NormalTok{)}
+\NormalTok{bedfile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"genes.hg19.chr22.bed.gz"}\NormalTok{)}
+\NormalTok{genomefile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.chrom.sizes.gz"}\NormalTok{)}
+\NormalTok{bgfile  <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hela.h3k4.chip.bg.gz"}\NormalTok{)}
 
 \NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(bedfile, }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{)}
 \NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(genomefile)}
@@ -125,17 +138,18 @@
 \NormalTok{p <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{.win_id, }\DataTypeTok{y =} \NormalTok{win_mean)) +}
 \StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \FloatTok{0.25}\NormalTok{) +}\StringTok{ }\KeywordTok{geom_pointrange}\NormalTok{(sd_limits, }\DataTypeTok{size =} \FloatTok{0.1}\NormalTok{) +}\StringTok{ }
 \StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{labels =} \NormalTok{x_labels, }\DataTypeTok{breaks =} \NormalTok{x_breaks) +}\StringTok{ }
-\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{'Position (bp from TSS)'}\NormalTok{) +}\StringTok{ }\KeywordTok{ylab}\NormalTok{(}\StringTok{'Signal'}\NormalTok{) +}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Position (bp from TSS)"}\NormalTok{) +}\StringTok{ }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Signal"}\NormalTok{) +}\StringTok{ }
 \StringTok{  }\KeywordTok{theme_classic}\NormalTok{() +}
-\StringTok{  }\NormalTok{pub_theme}
+\StringTok{  }\NormalTok{pub_theme +}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{90}\NormalTok{))}
 
-\KeywordTok{plot_grid}\NormalTok{(p, }\DataTypeTok{align =} \StringTok{'h'}\NormalTok{, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{, }\DataTypeTok{labels=}\StringTok{"AUTO"}\NormalTok{)}
+\KeywordTok{plot_grid}\NormalTok{(p, }\DataTypeTok{align =} \StringTok{"h"}\NormalTok{, }\DataTypeTok{nrow =} \DecValTok{1}\NormalTok{, }\DataTypeTok{labels=}\StringTok{"AUTO"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figure2.pdf"}\NormalTok{, }\DataTypeTok{width =} \FloatTok{5.6}\NormalTok{, }\DataTypeTok{height =} \DecValTok{4}\NormalTok{)}
+\KeywordTok{ggsave}\NormalTok{(}\StringTok{"figure2.pdf"}\NormalTok{, }\DataTypeTok{width =} \FloatTok{5.6}\NormalTok{, }\DataTypeTok{height =} \FloatTok{5.6}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -152,7 +166,7 @@
 \KeywordTok{library}\NormalTok{(cowplot)}
 
 \CommentTok{# Set-up test genome}
-\NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.chrom.sizes.gz'}\NormalTok{))}
+\NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.chrom.sizes.gz"}\NormalTok{))}
 \KeywordTok{write_tsv}\NormalTok{(genome, }\StringTok{"genome.txt"}\NormalTok{, }\DataTypeTok{col_names=}\OtherTok{FALSE}\NormalTok{)}
 
 \CommentTok{# number of intervals}
@@ -332,7 +346,7 @@
 \NormalTok{valr_data <-}\StringTok{ }\KeywordTok{filter}\NormalTok{(dat, package ==}\StringTok{ "valr"}\NormalTok{)}
 
 \NormalTok{plot_a <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\KeywordTok{reorder}\NormalTok{(expr, time), }\DataTypeTok{y =} \NormalTok{time)) +}
-\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{width =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{size =} \FloatTok{0.33}\NormalTok{, }\DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{fill =} \NormalTok{RColorBrewer::}\KeywordTok{brewer.pal}\NormalTok{(}\DecValTok{3}\NormalTok{, }\StringTok{"Set1"}\NormalTok{)[}\DecValTok{2}\NormalTok{]) +}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{width =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{size =} \FloatTok{0.33}\NormalTok{, }\DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{, }\DataTypeTok{fill =} \NormalTok{grDevices::}\KeywordTok{grey.colors}\NormalTok{(}\DecValTok{2}\NormalTok{)[}\DecValTok{2}\NormalTok{]) +}
 \StringTok{  }\KeywordTok{coord_flip}\NormalTok{() +}
 \StringTok{  }\KeywordTok{theme_bw}\NormalTok{() +}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}
@@ -352,8 +366,10 @@
 
 \NormalTok{plot_b <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(dat, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\KeywordTok{reorder}\NormalTok{(func, time), }\DataTypeTok{y =} \NormalTok{time, }\DataTypeTok{fill =} \NormalTok{package)) +}
 \StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{width =} \FloatTok{0.75}\NormalTok{, }\DataTypeTok{size =} \FloatTok{0.33}\NormalTok{, }\DataTypeTok{outlier.shape =} \OtherTok{NA}\NormalTok{) +}
-\StringTok{  }\KeywordTok{scale_fill_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"Set1"}\NormalTok{) +}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_fill_grey}\NormalTok{() +}\StringTok{ }
 \StringTok{  }\KeywordTok{coord_flip}\NormalTok{() +}
+\StringTok{  }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{xintercept =} \KeywordTok{seq_along}\NormalTok{(}\KeywordTok{unique}\NormalTok{(dat$func)) +}\StringTok{ }\FloatTok{0.5}\NormalTok{,}
+             \DataTypeTok{color =} \StringTok{"grey"}\NormalTok{) +}
 \StringTok{  }\KeywordTok{theme_bw}\NormalTok{() +}
 \StringTok{  }\KeywordTok{labs}\NormalTok{(}
     \DataTypeTok{y=}\StringTok{'execution time (seconds)'}\NormalTok{,}
@@ -380,6 +396,8 @@
 \end{Shaded}
 
 \subsection{Code demonstrations}\label{code-demonstrations}
+
+\subsubsection{file I/O}\label{file-io}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -419,54 +437,226 @@
 \end{Highlighting}
 \end{Shaded}
 
-Using mysql
+\subsubsection{syntax demo}\label{syntax-demo}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(dplyr, }\DataTypeTok{warn.conflicts =} \NormalTok{F)}
-\NormalTok{hg19 <-}\StringTok{ }\KeywordTok{db_ucsc}\NormalTok{(}\StringTok{"hg19"}\NormalTok{)}
-\KeywordTok{tbl}\NormalTok{(hg19, }\StringTok{"refGene"}\NormalTok{)}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 0 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 4 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 5 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 6 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 7 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 8 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 0 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 4 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 5 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 6 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 7 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> Warning in .local(conn, statement, ...): Unsigned INTEGER in col 8 imported}
-\CommentTok{#> as numeric}
-\CommentTok{#> # Source:   table<refGene> [?? x 16]}
-\CommentTok{#> # Database: mysql 5.6.26-log [genomep@genome-mysql.cse.ucsc.edu:/hg19]}
-\CommentTok{#>      bin         name chrom strand   txStart     txEnd  cdsStart    cdsEnd}
-\CommentTok{#>    <dbl>        <chr> <chr>  <chr>     <dbl>     <dbl>     <dbl>     <dbl>}
-\CommentTok{#>  1   585    NR_024540  chr1      -     14361     29370     29370     29370}
-\CommentTok{#>  2  1759    NR_110022  chrX      + 153991016 154005964 154005964 154005964}
-\CommentTok{#>  3   604    NR_033380  chrX      +   2527305   2575270   2575270   2575270}
-\CommentTok{#>  4    75    NR_033381  chrY      +   2477305   2506370   2506370   2506370}
-\CommentTok{#>  5   915    NM_182508 chr13      +  43355685  43365685  43358203  43362926}
-\CommentTok{#>  6   923    NM_181845 chr19      +  44331472  44353050  44337656  44352793}
-\CommentTok{#>  7   586    NR_039983  chr1      -    134772    140566    140566    140566}
-\CommentTok{#>  8  1964    NR_028327  chr5      + 180750506 180755196 180755196 180755196}
-\CommentTok{#>  9   126 NM_001271875 chr17      -  55938603  56032684  55943837  55962925}
-\CommentTok{#> 10  2278    NR_125989  chr1      - 222001007 222014008 222014008 222014008}
-\CommentTok{#> # ... with more rows, and 8 more variables: exonCount <dbl>,}
-\CommentTok{#> #   exonStarts <chr>, exonEnds <chr>, score <int>, name2 <chr>,}
-\CommentTok{#> #   cdsStartStat <chr>, cdsEndStat <chr>, exonFrames <chr>}
+\KeywordTok{library}\NormalTok{(valr)}
+\KeywordTok{library}\NormalTok{(dplyr)}
+
+\NormalTok{snps <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.snps147.chr22.bed.gz"}\NormalTok{), }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{)}
+\NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{"genes.hg19.chr22.bed.gz"}\NormalTok{), }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{)}
+
+\CommentTok{# find snps in intergenic regions}
+\NormalTok{intergenic <-}\StringTok{ }\KeywordTok{bed_subtract}\NormalTok{(snps, genes)}
+\CommentTok{# distance from intergenic snps to nearest gene}
+\NormalTok{nearby <-}\StringTok{ }\KeywordTok{bed_closest}\NormalTok{(intergenic, genes)}
+
+\NormalTok{nearby %>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(}\KeywordTok{starts_with}\NormalTok{(}\StringTok{"name"}\NormalTok{), .overlap, .dist) %>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\KeywordTok{abs}\NormalTok{(.dist) <}\StringTok{ }\DecValTok{1000}\NormalTok{)}
+\CommentTok{#> # A tibble: 285 x 4}
+\CommentTok{#>         name.x            name.y .overlap .dist}
+\CommentTok{#>          <chr>             <chr>    <int> <int>}
+\CommentTok{#>  1   rs2261631             P704P        0  -267}
+\CommentTok{#>  2 rs570770556             POTEH        0  -912}
+\CommentTok{#>  3 rs538163832             POTEH        0  -952}
+\CommentTok{#>  4   rs9606135            TPTEP1        0  -421}
+\CommentTok{#>  5  rs11912392 ANKRD62P1-PARP4P3        0   104}
+\CommentTok{#>  6   rs8136454          BC038197        0   355}
+\CommentTok{#>  7   rs5992556              XKR3        0  -455}
+\CommentTok{#>  8 rs114101676              GAB4        0   473}
+\CommentTok{#>  9  rs62236167             CECR7        0   261}
+\CommentTok{#> 10   rs5747023             CECR1        0  -386}
+\CommentTok{#> # ... with 275 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Figure 1 code demo}\label{figure-1-code-demo}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\NormalTok{tibble::}\KeywordTok{tribble}\NormalTok{(}
+  \NormalTok{~chrom, ~start, ~end,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{25}\NormalTok{,     }\DecValTok{50}\NormalTok{,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{100}\NormalTok{,    }\DecValTok{125}
+\NormalTok{)}
+
+\NormalTok{y <-}\StringTok{ }\NormalTok{tibble::}\KeywordTok{tribble}\NormalTok{(}
+  \NormalTok{~chrom, ~start, ~end,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{30}\NormalTok{,     }\DecValTok{75}
+\NormalTok{)}
+
+\KeywordTok{bed_glyph}\NormalTok{(}\KeywordTok{bed_intersect}\NormalTok{(x, y))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\NormalTok{tibble::}\KeywordTok{tribble}\NormalTok{(}
+  \NormalTok{~chrom, ~start, ~end,}
+  \StringTok{"chr1"}\NormalTok{,      }\DecValTok{1}\NormalTok{,      }\DecValTok{50}\NormalTok{,}
+  \StringTok{"chr1"}\NormalTok{,      }\DecValTok{10}\NormalTok{,     }\DecValTok{75}\NormalTok{,}
+  \StringTok{"chr1"}\NormalTok{,      }\DecValTok{100}\NormalTok{,    }\DecValTok{120}
+\NormalTok{)}
+
+\KeywordTok{bed_glyph}\NormalTok{(}\KeywordTok{bed_merge}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{grouping data demo}\label{grouping-data-demo}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\NormalTok{tibble::}\KeywordTok{tribble}\NormalTok{(}
+  \NormalTok{~chrom, ~start, ~end, ~strand,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{1}\NormalTok{,      }\DecValTok{100}\NormalTok{,  }\StringTok{"+"}\NormalTok{,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{50}\NormalTok{,     }\DecValTok{150}\NormalTok{,  }\StringTok{"+"}\NormalTok{,}
+  \StringTok{"chr2"}\NormalTok{, }\DecValTok{100}\NormalTok{,    }\DecValTok{200}\NormalTok{,  }\StringTok{"-"}
+\NormalTok{)}
+
+\NormalTok{y <-}\StringTok{ }\NormalTok{tibble::}\KeywordTok{tribble}\NormalTok{(}
+  \NormalTok{~chrom, ~start, ~end, ~strand,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{50}\NormalTok{,     }\DecValTok{125}\NormalTok{,  }\StringTok{"+"}\NormalTok{,}
+  \StringTok{"chr1"}\NormalTok{, }\DecValTok{50}\NormalTok{,     }\DecValTok{150}\NormalTok{,  }\StringTok{"-"}\NormalTok{,}
+  \StringTok{"chr2"}\NormalTok{, }\DecValTok{50}\NormalTok{,     }\DecValTok{150}\NormalTok{,  }\StringTok{"+"}
+\NormalTok{)}
+
+\CommentTok{# intersect tbls by strand}
+\NormalTok{x <-}\StringTok{ }\KeywordTok{group_by}\NormalTok{(x, strand)}
+\NormalTok{y <-}\StringTok{ }\KeywordTok{group_by}\NormalTok{(y, strand)}
+
+\KeywordTok{bed_intersect}\NormalTok{(x, y)}
+\CommentTok{#> # A tibble: 2 x 8}
+\CommentTok{#>   chrom start.x end.x strand.x start.y end.y strand.y .overlap}
+\CommentTok{#>   <chr>   <dbl> <dbl>    <chr>   <dbl> <dbl>    <chr>    <int>}
+\CommentTok{#> 1  chr1       1   100        +      50   125        +       50}
+\CommentTok{#> 2  chr1      50   150        +      50   125        +       75}
+\end{Highlighting}
+\end{Shaded}
+
+Comparisons between intervals on opposite strands are done using the
+\texttt{flip\_strands()} function:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x <-}\StringTok{ }\KeywordTok{group_by}\NormalTok{(x, strand)}
+
+\NormalTok{y <-}\StringTok{ }\KeywordTok{flip_strands}\NormalTok{(y)}
+\NormalTok{y <-}\StringTok{ }\KeywordTok{group_by}\NormalTok{(y, strand)}
+
+\KeywordTok{bed_intersect}\NormalTok{(x, y)}
+\CommentTok{#> # A tibble: 3 x 8}
+\CommentTok{#>   chrom start.x end.x strand.x start.y end.y strand.y .overlap}
+\CommentTok{#>   <chr>   <dbl> <dbl>    <chr>   <dbl> <dbl>    <chr>    <int>}
+\CommentTok{#> 1  chr2     100   200        -      50   150        -       50}
+\CommentTok{#> 2  chr1       1   100        +      50   150        +       50}
+\CommentTok{#> 3  chr1      50   150        +      50   150        +      100}
+\end{Highlighting}
+\end{Shaded}
+
+\subsubsection{Figure 2 code demo}\label{figure-2-code-demo}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bedfile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"genes.hg19.chr22.bed.gz"}\NormalTok{)}
+\NormalTok{genomefile <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.chrom.sizes.gz"}\NormalTok{)}
+\NormalTok{bgfile  <-}\StringTok{ }\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hela.h3k4.chip.bg.gz"}\NormalTok{)}
+
+\NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(bedfile, }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{)}
+\NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(genomefile)}
+\NormalTok{y <-}\StringTok{ }\KeywordTok{read_bedgraph}\NormalTok{(bgfile)}
+\end{Highlighting}
+\end{Shaded}
+
+Then we generate 1 bp intervals to represent transcription start sites
+(TSSs). We focus on \texttt{+} strand genes, but \texttt{-} genes are
+easily accomodated by filtering them and using
+\texttt{bed\_makewindows()} with \texttt{reversed} window numbers.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# generate 1 bp TSS intervals, "+" strand only}
+\NormalTok{tss <-}\StringTok{ }\NormalTok{genes %>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(strand ==}\StringTok{ "+"}\NormalTok{) %>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{end =} \NormalTok{start +}\StringTok{ }\DecValTok{1}\NormalTok{)}
+
+\CommentTok{# 1000 bp up and downstream}
+\NormalTok{region_size <-}\StringTok{ }\DecValTok{1000}
+\CommentTok{# 50 bp windows}
+\NormalTok{win_size <-}\StringTok{ }\DecValTok{50}
+
+\CommentTok{# add slop to the TSS, break into windows and add a group}
+\NormalTok{x <-}\StringTok{ }\NormalTok{tss %>%}
+\StringTok{  }\KeywordTok{bed_slop}\NormalTok{(genome, }\DataTypeTok{both =} \NormalTok{region_size) %>%}
+\StringTok{  }\KeywordTok{bed_makewindows}\NormalTok{(genome, win_size)}
+
+\NormalTok{x}
+\CommentTok{#> # A tibble: 13,530 x 7}
+\CommentTok{#>    chrom    start      end      name score strand .win_id}
+\CommentTok{#>    <chr>    <int>    <int>     <chr> <chr>  <chr>   <int>}
+\CommentTok{#>  1 chr22 16161065 16161115 LINC00516     3      +       1}
+\CommentTok{#>  2 chr22 16161115 16161165 LINC00516     3      +       2}
+\CommentTok{#>  3 chr22 16161165 16161215 LINC00516     3      +       3}
+\CommentTok{#>  4 chr22 16161215 16161265 LINC00516     3      +       4}
+\CommentTok{#>  5 chr22 16161265 16161315 LINC00516     3      +       5}
+\CommentTok{#>  6 chr22 16161315 16161365 LINC00516     3      +       6}
+\CommentTok{#>  7 chr22 16161365 16161415 LINC00516     3      +       7}
+\CommentTok{#>  8 chr22 16161415 16161465 LINC00516     3      +       8}
+\CommentTok{#>  9 chr22 16161465 16161515 LINC00516     3      +       9}
+\CommentTok{#> 10 chr22 16161515 16161565 LINC00516     3      +      10}
+\CommentTok{#> # ... with 13,520 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+Now we use the \texttt{.win\_id} group with \texttt{bed\_map()} to
+caluclate a sum by mapping \texttt{y} signals onto the intervals in
+\texttt{x}. These data are regrouped by \texttt{.win\_id} and a summary
+with \texttt{mean} and \texttt{sd} values is calculated.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# map signals to TSS regions and calculate summary statistics.}
+\NormalTok{res <-}\StringTok{ }\KeywordTok{bed_map}\NormalTok{(x, y, }\DataTypeTok{win_sum =} \KeywordTok{sum}\NormalTok{(value, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{)) %>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(.win_id) %>%}
+\StringTok{  }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{win_mean =} \KeywordTok{mean}\NormalTok{(win_sum, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{),}
+            \DataTypeTok{win_sd =} \KeywordTok{sd}\NormalTok{(win_sum, }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{))}
+
+\NormalTok{res}
+\CommentTok{#> # A tibble: 41 x 3}
+\CommentTok{#>    .win_id win_mean    win_sd}
+\CommentTok{#>      <int>    <dbl>     <dbl>}
+\CommentTok{#>  1       1 100.8974  85.83423}
+\CommentTok{#>  2       2 110.6829  81.13521}
+\CommentTok{#>  3       3 122.9070  99.09635}
+\CommentTok{#>  4       4 116.2800  96.30098}
+\CommentTok{#>  5       5 116.3500 102.33773}
+\CommentTok{#>  6       6 124.9048  95.08887}
+\CommentTok{#>  7       7 122.9437  94.39792}
+\CommentTok{#>  8       8 127.5946  91.47407}
+\CommentTok{#>  9       9 130.2051  95.71309}
+\CommentTok{#> 10      10 130.1220  88.82809}
+\CommentTok{#> # ... with 31 more rows}
+\end{Highlighting}
+\end{Shaded}
+
+Finally, these summary statistics are used to construct a plot that
+illustrates histone density surrounding TSSs.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+
+\NormalTok{x_labels <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(-region_size, region_size, }\DataTypeTok{by =} \NormalTok{win_size *}\StringTok{ }\DecValTok{5}\NormalTok{)}
+\NormalTok{x_breaks <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{41}\NormalTok{, }\DataTypeTok{by =} \DecValTok{5}\NormalTok{)}
+
+\NormalTok{sd_limits <-}\StringTok{ }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{ymax =} \NormalTok{win_mean +}\StringTok{ }\NormalTok{win_sd, }\DataTypeTok{ymin =} \NormalTok{win_mean -}\StringTok{ }\NormalTok{win_sd)}
+
+\NormalTok{p <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(res, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \NormalTok{.win_id, }\DataTypeTok{y =} \NormalTok{win_mean)) +}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \FloatTok{0.25}\NormalTok{) +}\StringTok{ }\KeywordTok{geom_pointrange}\NormalTok{(sd_limits, }\DataTypeTok{size =} \FloatTok{0.1}\NormalTok{) +}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{labels =} \NormalTok{x_labels, }\DataTypeTok{breaks =} \NormalTok{x_breaks) +}\StringTok{ }
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Position (bp from TSS)"}\NormalTok{) +}\StringTok{ }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Signal"}\NormalTok{) +}\StringTok{ }
+\StringTok{  }\KeywordTok{theme_classic}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -491,16 +681,16 @@ then calculated from the null-distribution.
 \begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(tidyverse, }\DataTypeTok{warn.conflicts =} \NormalTok{F)}
 
-\NormalTok{repeats <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.rmsk.chr22.bed.gz'}\NormalTok{), }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{) }
-\NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.chrom.sizes.gz'}\NormalTok{))}
-\NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed12}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{'hg19.refGene.chr22.bed.gz'}\NormalTok{))}
+\NormalTok{repeats <-}\StringTok{ }\KeywordTok{read_bed}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.rmsk.chr22.bed.gz"}\NormalTok{), }\DataTypeTok{n_fields =} \DecValTok{6}\NormalTok{) }
+\NormalTok{genome <-}\StringTok{ }\KeywordTok{read_genome}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.chrom.sizes.gz"}\NormalTok{))}
+\NormalTok{genes <-}\StringTok{ }\KeywordTok{read_bed12}\NormalTok{(}\KeywordTok{valr_example}\NormalTok{(}\StringTok{"hg19.refGene.chr22.bed.gz"}\NormalTok{))}
 \CommentTok{# convert bed12 to bed with exons}
 \NormalTok{exons <-}\StringTok{ }\KeywordTok{bed12_to_exons}\NormalTok{(genes)}
 
 \CommentTok{# function to repeat interval shuffling}
 \NormalTok{shuffle_intervals <-}\StringTok{ }\NormalTok{function(n, .data, genome) \{}
   \KeywordTok{replicate}\NormalTok{(n, }\KeywordTok{bed_shuffle}\NormalTok{(.data, genome), }\DataTypeTok{simplify =} \OtherTok{FALSE}\NormalTok{) %>%}
-\StringTok{    }\KeywordTok{bind_rows}\NormalTok{(}\DataTypeTok{.id =} \StringTok{'rep'}\NormalTok{) %>%}
+\StringTok{    }\KeywordTok{bind_rows}\NormalTok{(}\DataTypeTok{.id =} \StringTok{"rep"}\NormalTok{) %>%}
 \StringTok{    }\KeywordTok{group_by}\NormalTok{(rep) %>%}\StringTok{ }\KeywordTok{nest}\NormalTok{()}
 \NormalTok{\}}
 \NormalTok{nreps <-}\StringTok{ }\DecValTok{100}
@@ -512,16 +702,16 @@ then calculated from the null-distribution.
 \CommentTok{#> # A tibble: 100 x 3}
 \CommentTok{#>      rep                  data      jaccard}
 \CommentTok{#>    <chr>                <list>        <dbl>}
-\CommentTok{#>  1     1 <tibble [10,000 x 6]> 0.0004337515}
-\CommentTok{#>  2     2 <tibble [10,000 x 6]> 0.0003501136}
-\CommentTok{#>  3     3 <tibble [10,000 x 6]> 0.0006080318}
-\CommentTok{#>  4     4 <tibble [10,000 x 6]> 0.0005768465}
-\CommentTok{#>  5     5 <tibble [10,000 x 6]> 0.0002537739}
-\CommentTok{#>  6     6 <tibble [10,000 x 6]> 0.0004480599}
-\CommentTok{#>  7     7 <tibble [10,000 x 6]> 0.0001777942}
-\CommentTok{#>  8     8 <tibble [10,000 x 6]> 0.0003448734}
-\CommentTok{#>  9     9 <tibble [10,000 x 6]> 0.0003303327}
-\CommentTok{#> 10    10 <tibble [10,000 x 6]> 0.0003312376}
+\CommentTok{#>  1     1 <tibble [10,000 x 6]> 0.0003388967}
+\CommentTok{#>  2     2 <tibble [10,000 x 6]> 0.0004965988}
+\CommentTok{#>  3     3 <tibble [10,000 x 6]> 0.0002974843}
+\CommentTok{#>  4     4 <tibble [10,000 x 6]> 0.0006899870}
+\CommentTok{#>  5     5 <tibble [10,000 x 6]> 0.0004678412}
+\CommentTok{#>  6     6 <tibble [10,000 x 6]> 0.0001726937}
+\CommentTok{#>  7     7 <tibble [10,000 x 6]> 0.0004694941}
+\CommentTok{#>  8     8 <tibble [10,000 x 6]> 0.0004660410}
+\CommentTok{#>  9     9 <tibble [10,000 x 6]> 0.0006846643}
+\CommentTok{#> 10    10 <tibble [10,000 x 6]> 0.0002143829}
 \CommentTok{#> # ... with 90 more rows}
 
 \NormalTok{obs <-}\StringTok{ }\KeywordTok{bed_jaccard}\NormalTok{(repeats, exons)}
