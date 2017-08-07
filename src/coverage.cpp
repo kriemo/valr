@@ -16,7 +16,7 @@ void coverage_group(ivl_vector_t vx, ivl_vector_t vy,
 
   ivl_tree_t tree_y(vy) ;
   ivl_vector_t overlaps ;
-  IntervalSorterDesc<int, int> intervalSorterDesc;
+  IntervalSorterDesc<long long, long long> intervalSorterDesc;
 
   for (auto it : vx) {
 

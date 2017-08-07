@@ -13,9 +13,9 @@
 #include "valr.h"
 
 // main interval types used in valr
-typedef Interval<int>      ivl_t ;
+typedef Interval<long long, long long >      ivl_t ;
 typedef std::vector<ivl_t> ivl_vector_t ;
-typedef IntervalTree<int>  ivl_tree_t ;
+typedef IntervalTree<long long, long long>  ivl_tree_t ;
 
 // the value field of intervals in the returned vector correspond to the index
 // of the interval in the original dataframe (i.e., the values of the

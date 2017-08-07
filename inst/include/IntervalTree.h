@@ -27,7 +27,7 @@ SOFTWARE.
 #include <iostream>
 #include <memory>
 
-template <class T, typename K = int>
+template <class T, typename K = long long>
 class Interval {
 public:
   K start;
@@ -57,12 +57,12 @@ std::ostream& operator<<(std::ostream& out, Interval<T, K>& i) {
 }
 
 
-template <class T, typename K = int>
+template <class T, typename K = long long>
 K intervalOverlap(const Interval<T, K>& a, const Interval<T, K>& b) {
   return std::min(a.stop, b.stop) - std::max(a.start, b.start) ;
 }
 
-template <class T, typename K = int>
+template <class T, typename K = long long>
 class IntervalStartSorter {
 public:
   bool operator()(const Interval<T, K>& a, const Interval<T, K>& b) {
@@ -70,7 +70,7 @@ public:
   }
 };
 
-template <class T, typename K = int>
+template <class T, typename K = long long>
 class IntervalSorterDesc {
 public:
   bool operator()(const Interval<T, K>& a, const Interval<T, K>& b) {
@@ -78,7 +78,7 @@ public:
   }
 };
 
-template <class T, typename K = int>
+template <class T, typename K = long long>
 class IntervalTree {
 
 public:
