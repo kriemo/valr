@@ -25,9 +25,9 @@ using namespace dplyr ;
 #include "random.h"
 #include "DataFrameBuilder.h"
 
-#include "htslib/hts.h"
-#include "htslib/sam.h"
-#include "htslib/bgzf.h"
+#include "hts.h"
+#include "sam.h"
+#include "bgzf.h"
 
 // class for handling bam file opening and closing
 class BamReader {
