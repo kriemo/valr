@@ -143,6 +143,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// read_bam
+DataFrame read_bam(std::string bampath);
+RcppExport SEXP _valr_read_bam(SEXP bampathSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type bampath(bampathSEXP);
+    rcpp_result_gen = Rcpp::wrap(read_bam(bampath));
+    return rcpp_result_gen;
+END_RCPP
+}
 // shuffle_impl
 DataFrame shuffle_impl(DataFrame df, DataFrame incl, bool within, int max_tries, int seed);
 RcppExport SEXP _valr_shuffle_impl(SEXP dfSEXP, SEXP inclSEXP, SEXP withinSEXP, SEXP max_triesSEXP, SEXP seedSEXP) {

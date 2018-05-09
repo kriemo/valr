@@ -15,7 +15,7 @@ Description: Read and manipulate genome intervals and signals. Provides
              enabling interactive analysis and visualization of genome-scale data. 
 License: MIT + file LICENSE
 Depends:
-    R (>= 3.1.2)
+    R (>= 3.1.2),
 Imports:
     dplyr (>= 0.7.0),
     rlang,
@@ -24,12 +24,15 @@ Imports:
     tibble,
     broom,
     ggplot2,
+    Rhtslib
 SystemRequirements: C++11
 LinkingTo:
     Rcpp (>= 0.12.8),
     BH,
     plogr,
     bindrcpp,
+    Rhtslib, 
+    zlibbioc
 Suggests:
     knitr,
     rmarkdown,
@@ -45,7 +48,7 @@ Suggests:
     dbplyr,
     GenomicRanges,
     IRanges,
-    S4Vectors,
+    S4Vectors
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 URL: http://github.com/rnabioco/valr, http://rnabioco.github.io/valr

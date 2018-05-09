@@ -17,7 +17,7 @@ os: Visual Studio 2015 CTP 6
 build_script:
   - travis-tool.sh install_github hadley/devtools
   - travis-tool.sh install_deps
-  - travis-tool.sh install_bioc GenomicRanges
+  - travis-tool.sh install_bioc GenomicRanges Rhtslib zlibbioc
 
 test_script:
   - travis-tool.sh run_tests
